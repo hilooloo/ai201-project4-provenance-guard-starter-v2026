@@ -86,8 +86,12 @@ It cannot comprehend meaning. A human writing in strict rhythmic forms, haikus, 
      signals disagree? -->
 
 **The rule:**
+We use a weighted linear combination of the language model perplexity signal (Signal 1) and the statistical stylometric signal (Signal 2) to compute the final combined score.
 
 **The numbers:**
+- `MODEL_WEIGHT`: 0.65 (65% weight on the `detector.py` perplexity score)
+- `STYLE_WEIGHT`: 0.35 (35% weight on the `stylometry.py` statistical score)
+- Formula: `combined_score = round(min(max((model_score * 0.65) + (style_score * 0.35), 0.0), 1.0), 4)`
 
 **Where it lives:** `scoring.py::combine_signals`
 
@@ -95,6 +99,7 @@ It cannot comprehend meaning. A human writing in strict rhythmic forms, haikus, 
      somewhere else, say where. -->
 
 **A case where my two signals split, and what my rule does with it:**
+In the formal human writing test (`test_formal`), the vocabulary was elevated and predictable, causing the model perplexity score to be low (0.2763, indicating human), while the sentence structure was uniform (style_score: 0.5000). The combining rule weighted the model signal more heavily (0.65), pulling the overall score down to 0.3546 ("human") rather than letting the uniform sentence rhythm trigger a false positive accusation.
 
 
 ---

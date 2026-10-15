@@ -31,6 +31,8 @@ from flask import Flask, jsonify, request
 import audit
 import config
 import detector
+import scoring
+import stylometry
 
 app = Flask(__name__)
 
@@ -218,12 +220,14 @@ def submit():
 
     content_id = f"cnt_{uuid.uuid4().hex[:8]}"
 
-    # Milestone 3: one real signal, everything else a placeholder.
+    # Milestone 4: two signals, combined. The label is still a placeholder
+    # until Milestone 5.
     model_score = detector.model_signal(text)
-    guess = "human" if model_score < 0.5 else "ai"
-    confidence = model_score
+    style_score = stylometry.style_signal(text)
+    combined_score = scoring.combine_signals(model_score, style_score)
+    confidence = combined_score
+    guess = "ai" if combined_score >= 0.5 else "human"
     label = "Evaluation completed using primary model signal."
-    style_score = 0.0
 
     audit.log_decision(
         content_id=content_id,
@@ -233,6 +237,7 @@ def submit():
         label=label,
         model_score=model_score,
         style_score=style_score,
+        combined_score=combined_score,
     )
 
     return jsonify({
@@ -243,6 +248,7 @@ def submit():
         "label": label,
         "model_score": model_score,
         "style_score": style_score,
+        "combined_score": combined_score,
     }), 200
 
 
