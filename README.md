@@ -113,9 +113,9 @@ In the formal human writing test (`test_formal`), the vocabulary was elevated an
 
 | Label | Score range | The exact text a reader sees |
 |---|---|---|
-| high-confidence human | TBD | This piece shows strong personal style and varied sentence rhythm consistent with authentic human writing. |
-| unsure | TBD | This text presents mixed stylistic and structural signals, so its authorship cannot be determined reliably. |
-| high-confidence AI | TBD | This piece displays uniform rhythm and predictable patterns commonly produced by automated language models. |
+| high-confidence human | 0.0000 - 0.4000 | This piece shows strong personal style and varied sentence rhythm consistent with authentic human writing. |
+| unsure | 0.4001 - 0.5300 | This text presents mixed stylistic and structural signals, so its authorship cannot be determined reliably. |
+| high-confidence AI | 0.5301 - 1.0000 | This piece displays uniform rhythm and predictable patterns commonly produced by automated language models. |
 
 **Why I worded the "unsure" one this way:**
 <!-- It's the hardest of the three. It has to admit uncertainty without
@@ -157,36 +157,47 @@ curl.exe -X POST http://127.0.0.1:5000/submit -H "Content-Type: application/json
 **An appeal**
 
 ```bash
-$ curl -X POST http://127.0.0.1:5000/appeal \
-  -H "Content-Type: application/json" \
-  -d '{"content_id": "...", "reasoning": "..."}'
+curl.exe -X POST http://127.0.0.1:5000/appeal -H "Content-Type: application/json" -d '{\"content_id\": \"cnt_fe3d854f\", \"reasoning\": \"I wrote this text myself for a technical presentation without using AI generators.\"}'
 ```
 
 ```json
-
+{
+  "content_id": "cnt_fe3d854f",
+  "message": "Appeal recorded successfully. The evaluation is now under review.",
+  "ok": true,
+  "status": "under_review"
+}
 ```
 
 **What the log shows afterwards**
 
 ```bash
-curl.exe "http://127.0.0.1:5000/log?limit=3"
+curl.exe "http://127.0.0.1:5000/log?limit=2"
 ```
 
 ```json
 {
-  "count": 1,
+  "count": 2,
   "entries": [
     {
-      "combined_score": null,
-      "confidence": 0.5537,
-      "content_id": "cnt_7951ef1e",
-      "creator_id": "writer_01",
+      "combined_score": 0.5478,
+      "confidence": 0.5478,
+      "content_id": "cnt_fe3d854f",
+      "creator_id": "writer_ai",
       "guess": "ai",
-      "label": "Evaluation completed using primary model signal.",
-      "model_score": 0.5537,
+      "label": "This piece displays uniform rhythm and predictable patterns commonly produced by automated language models.",
+      "model_score": 0.5735,
       "status": "decided",
-      "style_score": 0.0,
-      "timestamp": "2026-10-15T02:12:03+00:00"
+      "style_score": 0.5,
+      "timestamp": "2026-10-15T02:34:32+00:00"
+    },
+    {
+      "content_id": "cnt_fe3d854f",
+      "creator_id": "writer_ai",
+      "event": "appeal",
+      "reasoning": "I wrote this text myself for a technical presentation without using AI generators.",
+      "status": "under_review",
+      "timestamp": "2026-10-15T02:36:04+00:00"
     }
   ]
 }

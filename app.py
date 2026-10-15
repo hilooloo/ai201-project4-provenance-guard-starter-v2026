@@ -220,14 +220,13 @@ def submit():
 
     content_id = f"cnt_{uuid.uuid4().hex[:8]}"
 
-    # Milestone 4: two signals, combined. The label is still a placeholder
-    # until Milestone 5.
+    # Milestone 5: two signals, combined, mapped to a reader-facing label.
     model_score = detector.model_signal(text)
     style_score = stylometry.style_signal(text)
     combined_score = scoring.combine_signals(model_score, style_score)
     confidence = combined_score
     guess = "ai" if combined_score >= 0.5 else "human"
-    label = "Evaluation completed using primary model signal."
+    label = scoring.score_to_label(combined_score)
 
     audit.log_decision(
         content_id=content_id,
@@ -273,13 +272,40 @@ def appeal():
     wrong accusation and nothing at all.
     """
     payload = request.get_json(silent=True) or {}
+    content_id = payload.get("content_id")
+    reasoning = payload.get("reasoning", "")
 
-    # TODO: delete this and build the route.
+    if not content_id:
+        return jsonify({
+            "error": "invalid_input",
+            "message": "'content_id' is required.",
+        }), 400
+    if not isinstance(reasoning, str) or not reasoning.strip():
+        return jsonify({
+            "error": "invalid_input",
+            "message": "'reasoning' is required.",
+        }), 400
+
+    entries = audit.entries_for(content_id)
+    if not entries:
+        return jsonify({
+            "error": "not_found",
+            "message": f"No submission found for content_id {content_id}",
+        }), 404
+
+    # log_appeal needs the writer's id; take it from the original decision.
+    audit.log_appeal(
+        content_id=content_id,
+        creator_id=entries[0].get("creator_id"),
+        reasoning=reasoning,
+    )
+
     return jsonify({
-        "error": "not_implemented",
-        "message": "POST /appeal isn't built yet — see the TODO in app.py.",
-        "you_sent": payload,
-    }), 501
+        "ok": True,
+        "content_id": content_id,
+        "status": "under_review",
+        "message": "Appeal recorded successfully. The evaluation is now under review.",
+    }), 200
 
 
 # ── Already works ─────────────────────────────────────────────────────────────
