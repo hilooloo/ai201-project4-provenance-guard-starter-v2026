@@ -209,15 +209,15 @@ curl.exe "http://127.0.0.1:5000/log?limit=2"
 
 **Moment 1**
 
-- *What I asked for:*
-- *What came back:*
-- *What I changed:*
+- *What I asked for:* I asked Claude to implement the stylometric signal in `stylometry.py` measuring sentence length variance, type-token ratio, and punctuation density.
+- *What came back:* Claude provided the complete functions and combined them into a single `style_score` between 0.0 and 1.0.
+- *What I changed:* When testing with a single sentence, sentence length spread returned 0.0. I ensured the scoring rule and edge cases handled short inputs gracefully without unfairly penalizing normal human sentences.
 
 **Moment 2**
 
-- *What I asked for:*
-- *What came back:*
-- *What I changed:*
+- *What I asked for:* I asked Claude to implement the `POST /appeal` endpoint in `app.py` to verify `content_id` in `audit.jsonl` and update its status.
+- *What came back:* Claude wrote the Flask route handling JSON payloads, checking existing entries via `audit.entries_for()`, calling `audit.log_appeal()`, and returning a 200 response.
+- *What I changed:* I added explicit 400 validation checks to ensure both `content_id` and `reasoning` fields are provided and non-empty before querying the audit log.
 
 <!-- ═══════════════════════ UNIT 8 — THE TEST ═══════════════════════ -->
 
