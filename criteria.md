@@ -45,60 +45,46 @@ Two things worth knowing before you pick numbers:
 ## 1.
 
 <!-- Your criterion. It must name a number. -->
-
-
+In a test set of 10 distinctly human-written personal creative texts, at most 1 is labeled as "high-confidence AI".
 
 **Why this target:**
-
-
+Falsely accusing a real human author of using AI causes severe reputational harm and breaks trust on a creative writing platform. I set the ceiling at 10% because an incorrect accusation is far more costly than letting an AI piece pass through.
 
 ---
 
 ## 2.
 
-<!-- Your criterion. -->
-
-
+The difference between the average score of 5 raw AI-generated pieces and 5 human-written pieces is at least 0.35 on a 0.0 to 1.0 scale.
 
 **Why this target:**
-
-
+A reliable detection pipeline must clearly separate obvious AI text from obvious human text before it can handle borderline or lightly edited writing. A 0.35 separation ensures the two signals produce meaningful distinction rather than collapsing toward the middle.
 
 ---
 
 ## 3.
 
-<!-- Your criterion. -->
-
-
+Across 15 varied test submissions (5 human, 5 AI, and 5 borderline or edited), each of the three labels ("high-confidence human", "unsure", "high-confidence AI") is assigned at least 2 times.
 
 **Why this target:**
-
-
+A system that never uses the "unsure" label or collapses into a strict binary choice fails to handle real-world uncertainty. Every reachable label variant must be actively used by the scoring logic.
 
 ---
 
 ## 4.
 
-<!-- Your criterion. -->
-
-
+100% of valid POST /appeal requests targeting an existing submission successfully update the status in logs/audit.jsonl to "under_review" and record the author's reasoning.
 
 **Why this target:**
-
-
+The appeal system is the safety net for writers who receive an unfair evaluation. The backend must reliably record every dispute and update the audit log without losing records or failing silently.
 
 ---
 
 ## 5.
 
-<!-- Your criterion. -->
-
-
+100% of requests with missing text, empty strings, whitespace-only text, or missing creator_id return an HTTP 400 Bad Request with an explanatory JSON error message, and the server process continues running without crashing.
 
 **Why this target:**
-
-
+Public-facing endpoints must handle bad or malformed client payloads gracefully. Rejecting invalid requests cleanly prevents downstream exceptions and protects the service from crashing.
 
 ---
 

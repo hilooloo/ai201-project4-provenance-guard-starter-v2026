@@ -30,6 +30,7 @@ from flask import Flask, jsonify, request
 
 import audit
 import config
+import detector
 
 app = Flask(__name__)
 
@@ -201,15 +202,48 @@ def submit():
     """
     payload = request.get_json(silent=True) or {}
 
-    # TODO: delete this and build the route.
+    text = payload.get("text")
+    creator_id = payload.get("creator_id")
+
+    if not isinstance(text, str) or not text.strip():
+        return jsonify({
+            "error": "invalid_input",
+            "message": "'text' is required and must be a non-empty string.",
+        }), 400
+    if not creator_id:
+        return jsonify({
+            "error": "invalid_input",
+            "message": "'creator_id' is required.",
+        }), 400
+
+    content_id = f"cnt_{uuid.uuid4().hex[:8]}"
+
+    # Milestone 3: one real signal, everything else a placeholder.
+    model_score = detector.model_signal(text)
+    guess = "human" if model_score < 0.5 else "ai"
+    confidence = model_score
+    label = "Evaluation completed using primary model signal."
+    style_score = 0.0
+
+    audit.log_decision(
+        content_id=content_id,
+        creator_id=creator_id,
+        guess=guess,
+        confidence=confidence,
+        label=label,
+        model_score=model_score,
+        style_score=style_score,
+    )
+
     return jsonify({
-        "error": "not_implemented",
-        "message": "POST /submit isn't built yet — see the TODO in app.py.",
-        "you_sent": {
-            "text_length": len(payload.get("text", "")),
-            "creator_id": payload.get("creator_id"),
-        },
-    }), 501
+        "content_id": content_id,
+        "creator_id": creator_id,
+        "guess": guess,
+        "confidence": confidence,
+        "label": label,
+        "model_score": model_score,
+        "style_score": style_score,
+    }), 200
 
 
 @app.post("/appeal")
