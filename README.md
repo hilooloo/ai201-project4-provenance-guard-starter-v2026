@@ -39,7 +39,14 @@
 <!-- The path a submission takes, from arriving to the label a reader sees.
      Six or seven steps — this is the trace you wrote in Milestone 1. -->
 
+The service inspects submitted writing through a six-step pipeline to evaluate whether it resembles human or AI authorship, while preserving an appeal channel:
 
+1. **Submission Arrives (`POST /submit`):** A client sends a JSON payload with `creator_id` and `text`.
+2. **Validation & Identification:** The service verifies that `text` and `creator_id` are present and non-empty. It assigns a unique tracking identifier (`content_id`).
+3. **Signal 1 Computation (`detector.py`):** The local language model measures perplexity (word predictability) to calculate `model_score` on a scale from 0.0 to 1.0.
+4. **Signal 2 Computation (`stylometry.py`):** Statistical text analysis evaluates sentence length variation, vocabulary diversity, and punctuation density to compute `style_score` on a scale from 0.0 to 1.0.
+5. **Score Combination & Labeling (`scoring.py`):** The two signals are blended into a unified confidence score, which maps to one of three descriptive labels: *high-confidence human*, *unsure*, or *high-confidence AI*.
+6. **Audit Logging & Response Delivery:** The decision, timestamp, and scores are logged to `logs/audit.jsonl`, and structured JSON is returned to the client. If dissatisfied, the author can contest the evaluation via `POST /appeal`.
 
 ---
 
@@ -54,18 +61,24 @@
 ### Signal one — the model signal
 
 **What it measures:**
+Perplexity using a local GPT-2 language model. It evaluates how predictable each word is in sequence.
 
 **Why that might differ between human and AI writing:**
+AI models produce text by repeatedly selecting statistically probable next tokens. Authentic human writing contains unexpected phrasing, idiomatic expressions, and personal stylistic choices that surprise the model.
 
 **What it can't see:**
+It cannot distinguish between machine text and plain, simple human text. If an author writes in straightforward, simple English (such as concise instructions, basic student essays, or non-native English writing), the model finds it highly predictable and flags it as AI-generated.
 
 ### Signal two — the style signal
 
 **What it measures:**
+Surface-level statistical patterns across the text: sentence length variation (spread), type-token ratio (vocabulary richness), and punctuation density.
 
 **Why that might differ between human and AI writing:**
+Human writers exhibit natural burstiness — combining short, sharp sentences with longer, multi-clause thoughts. AI writing tends to produce steady, medium-length sentences with uniform rhythm.
 
 **What it can't see:**
+It cannot comprehend meaning. A human writing in strict rhythmic forms, haikus, or repetitive nursery rhymes will trigger the uniform-structure flag. Conversely, an AI prompted to deliberately alternate sentence lengths will bypass this signal.
 
 ### The combining rule
 
@@ -84,7 +97,6 @@
 **A case where my two signals split, and what my rule does with it:**
 
 
-
 ---
 
 ## Label Variants
@@ -96,15 +108,15 @@
 
 | Label | Score range | The exact text a reader sees |
 |---|---|---|
-| high-confidence human |  |  |
-| unsure |  |  |
-| high-confidence AI |  |  |
+| high-confidence human | TBD | This piece shows strong personal style and varied sentence rhythm consistent with authentic human writing. |
+| unsure | TBD | This text presents mixed stylistic and structural signals, so its authorship cannot be determined reliably. |
+| high-confidence AI | TBD | This piece displays uniform rhythm and predictable patterns commonly produced by automated language models. |
 
 **Why I worded the "unsure" one this way:**
 <!-- It's the hardest of the three. It has to admit uncertainty without
      sounding like an accusation, because the person reading it may well have
      written every word themselves. -->
-
+The "unsure" label transparently conveys system limits without implying wrongdoing. Because authentic authors regularly write in clear, balanced styles that register intermediate scores, the wording emphasizes that the limitation belongs to the detection tooling, not the writer's integrity.
 
 
 ---
