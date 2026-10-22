@@ -154,7 +154,7 @@ def health():
 # ── YOU BUILD THIS ────────────────────────────────────────────────────────────
 
 @app.post("/submit")
-# @limiter.limit(f"{config.RATE_LIMIT_PER_MINUTE}/minute;{config.RATE_LIMIT_PER_DAY}/day")
+@limiter.limit(f"{config.SUBMIT_LIMIT_PER_MINUTE};{config.SUBMIT_LIMIT_PER_DAY}")
 def submit():
     """
     Take a piece of text, decide about it, log the decision, answer.

@@ -225,25 +225,29 @@ curl.exe "http://127.0.0.1:5000/log?limit=2"
 
 ## Rate Limiting
 
-**My limits:** ___ per minute, ___ per day
+**My limits:** 10 per minute, 200 per day
 
 **Why those numbers and not others:**
 <!-- Think about two people: a real writer submitting their own work a few
      times an hour, and a script sending a thousand variations to map your
      thresholds. Your numbers have to be liveable for the first and hostile to
      the second. -->
+We selected 10 requests per minute to give legitimate human writers ample room to draft, test, and revise their work naturally without interruption. Meanwhile, it swiftly caps automated scripts from spamming the system or mapping out detection thresholds. The daily allowance of 200 requests accommodates heavy daily workflows while preventing bulk automated scraping and denial-of-service attempts.
 
 **What a caller counts as:** <!-- per address, or per creator_id? They fail
 differently — one script can look like a thousand callers, and one household
 can look like one. -->
+Each `creator_id` is counted separately. If a request has no usable `creator_id`, it is counted by the caller's IP address instead (`rate_limit_key` in `app.py`).
 
 **The run of status codes when I pushed past it:**
 
 <!-- python run_attacks.py --flood 15 -->
 
+```text
+200 200 200 200 200 200 200 200 200 200 429 429 429 429 429
 ```
 
-```
+5 of 15 requests were rate limited with HTTP 429 status codes. Every blocked request was logged to `audit.jsonl` with its timestamp and limiting rule to ensure full visibility.
 
 ---
 
