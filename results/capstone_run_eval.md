@@ -1,6 +1,6 @@
 # Capstone run: Trial 1 raw output
 
-- Produced by: `eval_capstone.py` · 2026-11-04 21:31
+- Produced by: `eval_capstone.py` · 2026-11-04 21:39
 - Service: `app.py::submit` and `app.py::appeal`, called through Flask's test client
 - 3 trials ran; this file holds the raw responses and log entries for trial 1
 
@@ -12,7 +12,7 @@
 | 2. Single-character text returns 400, no crash | 5 of 5 | 5/5 | 5/5 | 5/5 | MET |
 | 3. Rejected requests are in the audit log | 10 of 10 | 10/10 | 10/10 | 10/10 | MET |
 | 4. Legitimate submissions still get a full evaluation | 5 of 5 | 5/5 | 5/5 | 5/5 | MET |
-| 5. Error handling under 50 ms | at least 9 of 10 | 10/10 (max 2.5 ms) | 10/10 (max 2.4 ms) | 10/10 (max 2.8 ms) | MET |
+| 5. Error handling under 50 ms | at least 9 of 10 | 10/10 (max 2.8 ms) | 10/10 (max 3.7 ms) | 10/10 (max 2.9 ms) | MET |
 
 ## Criterion 1: non-object JSON body returns 400
 
@@ -128,7 +128,7 @@
     "status": 400,
     "response": {
       "error": "invalid_input",
-      "message": "Text is too short to score — a few sentences at least."
+      "message": "Text is too short to score: please submit at least 10 characters (a few sentences works best)."
     },
     "passed": true
   },
@@ -140,7 +140,7 @@
     "status": 400,
     "response": {
       "error": "invalid_input",
-      "message": "Text is too short to score — a few sentences at least."
+      "message": "Text is too short to score: please submit at least 10 characters (a few sentences works best)."
     },
     "passed": true
   },
@@ -152,7 +152,7 @@
     "status": 400,
     "response": {
       "error": "invalid_input",
-      "message": "Text is too short to score — a few sentences at least."
+      "message": "Text is too short to score: please submit at least 10 characters (a few sentences works best)."
     },
     "passed": true
   },
@@ -164,7 +164,7 @@
     "status": 400,
     "response": {
       "error": "invalid_input",
-      "message": "Text is too short to score — a few sentences at least."
+      "message": "Text is too short to score: please submit at least 10 characters (a few sentences works best)."
     },
     "passed": true
   },
@@ -176,7 +176,7 @@
     "status": 400,
     "response": {
       "error": "invalid_input",
-      "message": "Text is too short to score — a few sentences at least."
+      "message": "Text is too short to score: please submit at least 10 characters (a few sentences works best)."
     },
     "passed": true
   }
@@ -190,7 +190,7 @@ Malformed-body rejections logged: 5. Too-short rejections logged: 5.
 ```json
 [
   {
-    "timestamp": "2026-11-05T02:31:09+00:00",
+    "timestamp": "2026-11-05T02:39:26+00:00",
     "creator_id": "unknown",
     "event": "rejected",
     "status": "rejected",
@@ -198,7 +198,7 @@ Malformed-body rejections logged: 5. Too-short rejections logged: 5.
     "limit": "body must be a JSON object"
   },
   {
-    "timestamp": "2026-11-05T02:31:09+00:00",
+    "timestamp": "2026-11-05T02:39:26+00:00",
     "creator_id": "unknown",
     "event": "rejected",
     "status": "rejected",
@@ -206,7 +206,7 @@ Malformed-body rejections logged: 5. Too-short rejections logged: 5.
     "limit": "body must be a JSON object"
   },
   {
-    "timestamp": "2026-11-05T02:31:09+00:00",
+    "timestamp": "2026-11-05T02:39:26+00:00",
     "creator_id": "unknown",
     "event": "rejected",
     "status": "rejected",
@@ -214,7 +214,7 @@ Malformed-body rejections logged: 5. Too-short rejections logged: 5.
     "limit": "body must be a JSON object"
   },
   {
-    "timestamp": "2026-11-05T02:31:09+00:00",
+    "timestamp": "2026-11-05T02:39:26+00:00",
     "creator_id": "unknown",
     "event": "rejected",
     "status": "rejected",
@@ -222,7 +222,7 @@ Malformed-body rejections logged: 5. Too-short rejections logged: 5.
     "limit": "body must be a JSON object"
   },
   {
-    "timestamp": "2026-11-05T02:31:09+00:00",
+    "timestamp": "2026-11-05T02:39:26+00:00",
     "creator_id": "unknown",
     "event": "rejected",
     "status": "rejected",
@@ -230,44 +230,44 @@ Malformed-body rejections logged: 5. Too-short rejections logged: 5.
     "limit": "body must be a JSON object"
   },
   {
-    "timestamp": "2026-11-05T02:31:09+00:00",
+    "timestamp": "2026-11-05T02:39:26+00:00",
     "creator_id": "cap1_short_0",
     "event": "rejected",
     "status": "rejected",
     "reason": "text_too_short",
-    "limit": "text must contain at least a few sentences"
+    "limit": "text must be at least 10 characters"
   },
   {
-    "timestamp": "2026-11-05T02:31:09+00:00",
+    "timestamp": "2026-11-05T02:39:26+00:00",
     "creator_id": "cap1_short_1",
     "event": "rejected",
     "status": "rejected",
     "reason": "text_too_short",
-    "limit": "text must contain at least a few sentences"
+    "limit": "text must be at least 10 characters"
   },
   {
-    "timestamp": "2026-11-05T02:31:09+00:00",
+    "timestamp": "2026-11-05T02:39:26+00:00",
     "creator_id": "cap1_short_2",
     "event": "rejected",
     "status": "rejected",
     "reason": "text_too_short",
-    "limit": "text must contain at least a few sentences"
+    "limit": "text must be at least 10 characters"
   },
   {
-    "timestamp": "2026-11-05T02:31:09+00:00",
+    "timestamp": "2026-11-05T02:39:26+00:00",
     "creator_id": "cap1_short_3",
     "event": "rejected",
     "status": "rejected",
     "reason": "text_too_short",
-    "limit": "text must contain at least a few sentences"
+    "limit": "text must be at least 10 characters"
   },
   {
-    "timestamp": "2026-11-05T02:31:09+00:00",
+    "timestamp": "2026-11-05T02:39:26+00:00",
     "creator_id": "cap1_short_4",
     "event": "rejected",
     "status": "rejected",
     "reason": "text_too_short",
-    "limit": "text must contain at least a few sentences"
+    "limit": "text must be at least 10 characters"
   }
 ]
 ```
@@ -285,7 +285,7 @@ Malformed-body rejections logged: 5. Too-short rejections logged: 5.
     "response": {
       "combined_score": 0.5338,
       "confidence": 0.5338,
-      "content_id": "cnt_6f964110",
+      "content_id": "cnt_54fd744d",
       "creator_id": "cap1_valid_0",
       "guess": "ai",
       "label": "This text presents mixed stylistic and structural signals, so its authorship cannot be determined reliably.",
@@ -303,7 +303,7 @@ Malformed-body rejections logged: 5. Too-short rejections logged: 5.
     "response": {
       "combined_score": 0.1675,
       "confidence": 0.1675,
-      "content_id": "cnt_468b6b85",
+      "content_id": "cnt_229115f3",
       "creator_id": "cap1_valid_1",
       "guess": "human",
       "label": "This piece shows strong personal style and varied sentence rhythm consistent with authentic human writing.",
@@ -321,7 +321,7 @@ Malformed-body rejections logged: 5. Too-short rejections logged: 5.
     "response": {
       "combined_score": 0.4259,
       "confidence": 0.4259,
-      "content_id": "cnt_a6b0c4e4",
+      "content_id": "cnt_6e7c0180",
       "creator_id": "cap1_valid_2",
       "guess": "human",
       "label": "This text presents mixed stylistic and structural signals, so its authorship cannot be determined reliably.",
@@ -339,7 +339,7 @@ Malformed-body rejections logged: 5. Too-short rejections logged: 5.
     "response": {
       "combined_score": 0.424,
       "confidence": 0.424,
-      "content_id": "cnt_6f69b6f2",
+      "content_id": "cnt_25c7be8c",
       "creator_id": "cap1_valid_3",
       "guess": "human",
       "label": "This text presents mixed stylistic and structural signals, so its authorship cannot be determined reliably.",
@@ -357,7 +357,7 @@ Malformed-body rejections logged: 5. Too-short rejections logged: 5.
     "response": {
       "combined_score": 0.3636,
       "confidence": 0.3636,
-      "content_id": "cnt_68c4a0fb",
+      "content_id": "cnt_f51ab988",
       "creator_id": "cap1_valid_4",
       "guess": "human",
       "label": "This piece shows strong personal style and varied sentence rhythm consistent with authentic human writing.",
@@ -380,7 +380,7 @@ Malformed-body rejections logged: 5. Too-short rejections logged: 5.
       2
     ],
     "status": 400,
-    "milliseconds": 2.49,
+    "milliseconds": 2.75,
     "under_50ms": true,
     "response": {
       "error": "invalid_input",
@@ -391,7 +391,7 @@ Malformed-body rejections logged: 5. Too-short rejections logged: 5.
     "kind": "non-object body",
     "body_sent": [],
     "status": 400,
-    "milliseconds": 1.77,
+    "milliseconds": 2.23,
     "under_50ms": true,
     "response": {
       "error": "invalid_input",
@@ -402,7 +402,7 @@ Malformed-body rejections logged: 5. Too-short rejections logged: 5.
     "kind": "non-object body",
     "body_sent": "hi",
     "status": 400,
-    "milliseconds": 2.19,
+    "milliseconds": 2.33,
     "under_50ms": true,
     "response": {
       "error": "invalid_input",
@@ -413,7 +413,7 @@ Malformed-body rejections logged: 5. Too-short rejections logged: 5.
     "kind": "non-object body",
     "body_sent": 42,
     "status": 400,
-    "milliseconds": 1.87,
+    "milliseconds": 2.37,
     "under_50ms": true,
     "response": {
       "error": "invalid_input",
@@ -426,7 +426,7 @@ Malformed-body rejections logged: 5. Too-short rejections logged: 5.
       true
     ],
     "status": 400,
-    "milliseconds": 1.7,
+    "milliseconds": 2.18,
     "under_50ms": true,
     "response": {
       "error": "invalid_input",
@@ -440,11 +440,11 @@ Malformed-body rejections logged: 5. Too-short rejections logged: 5.
       "creator_id": "cap1_lat_0"
     },
     "status": 400,
-    "milliseconds": 1.94,
+    "milliseconds": 2.07,
     "under_50ms": true,
     "response": {
       "error": "invalid_input",
-      "message": "Text is too short to score — a few sentences at least."
+      "message": "Text is too short to score: please submit at least 10 characters (a few sentences works best)."
     }
   },
   {
@@ -454,11 +454,11 @@ Malformed-body rejections logged: 5. Too-short rejections logged: 5.
       "creator_id": "cap1_lat_1"
     },
     "status": 400,
-    "milliseconds": 1.93,
+    "milliseconds": 2.08,
     "under_50ms": true,
     "response": {
       "error": "invalid_input",
-      "message": "Text is too short to score — a few sentences at least."
+      "message": "Text is too short to score: please submit at least 10 characters (a few sentences works best)."
     }
   },
   {
@@ -468,11 +468,11 @@ Malformed-body rejections logged: 5. Too-short rejections logged: 5.
       "creator_id": "cap1_lat_2"
     },
     "status": 400,
-    "milliseconds": 2.3,
+    "milliseconds": 1.77,
     "under_50ms": true,
     "response": {
       "error": "invalid_input",
-      "message": "Text is too short to score — a few sentences at least."
+      "message": "Text is too short to score: please submit at least 10 characters (a few sentences works best)."
     }
   },
   {
@@ -482,11 +482,11 @@ Malformed-body rejections logged: 5. Too-short rejections logged: 5.
       "creator_id": "cap1_lat_3"
     },
     "status": 400,
-    "milliseconds": 1.65,
+    "milliseconds": 1.83,
     "under_50ms": true,
     "response": {
       "error": "invalid_input",
-      "message": "Text is too short to score — a few sentences at least."
+      "message": "Text is too short to score: please submit at least 10 characters (a few sentences works best)."
     }
   },
   {
@@ -496,11 +496,11 @@ Malformed-body rejections logged: 5. Too-short rejections logged: 5.
       "creator_id": "cap1_lat_4"
     },
     "status": 400,
-    "milliseconds": 1.89,
+    "milliseconds": 2.33,
     "under_50ms": true,
     "response": {
       "error": "invalid_input",
-      "message": "Text is too short to score — a few sentences at least."
+      "message": "Text is too short to score: please submit at least 10 characters (a few sentences works best)."
     }
   }
 ]
@@ -511,7 +511,7 @@ Malformed-body rejections logged: 5. Too-short rejections logged: 5.
 ```json
 [
   {
-    "timestamp": "2026-11-05T02:31:09+00:00",
+    "timestamp": "2026-11-05T02:39:26+00:00",
     "creator_id": "unknown",
     "event": "rejected",
     "status": "rejected",
@@ -519,7 +519,7 @@ Malformed-body rejections logged: 5. Too-short rejections logged: 5.
     "limit": "body must be a JSON object"
   },
   {
-    "timestamp": "2026-11-05T02:31:09+00:00",
+    "timestamp": "2026-11-05T02:39:26+00:00",
     "creator_id": "unknown",
     "event": "rejected",
     "status": "rejected",
@@ -527,7 +527,7 @@ Malformed-body rejections logged: 5. Too-short rejections logged: 5.
     "limit": "body must be a JSON object"
   },
   {
-    "timestamp": "2026-11-05T02:31:09+00:00",
+    "timestamp": "2026-11-05T02:39:26+00:00",
     "creator_id": "unknown",
     "event": "rejected",
     "status": "rejected",
@@ -535,7 +535,7 @@ Malformed-body rejections logged: 5. Too-short rejections logged: 5.
     "limit": "body must be a JSON object"
   },
   {
-    "timestamp": "2026-11-05T02:31:09+00:00",
+    "timestamp": "2026-11-05T02:39:26+00:00",
     "creator_id": "unknown",
     "event": "rejected",
     "status": "rejected",
@@ -543,7 +543,7 @@ Malformed-body rejections logged: 5. Too-short rejections logged: 5.
     "limit": "body must be a JSON object"
   },
   {
-    "timestamp": "2026-11-05T02:31:09+00:00",
+    "timestamp": "2026-11-05T02:39:26+00:00",
     "creator_id": "unknown",
     "event": "rejected",
     "status": "rejected",
@@ -551,48 +551,48 @@ Malformed-body rejections logged: 5. Too-short rejections logged: 5.
     "limit": "body must be a JSON object"
   },
   {
-    "timestamp": "2026-11-05T02:31:09+00:00",
+    "timestamp": "2026-11-05T02:39:26+00:00",
     "creator_id": "cap1_short_0",
     "event": "rejected",
     "status": "rejected",
     "reason": "text_too_short",
-    "limit": "text must contain at least a few sentences"
+    "limit": "text must be at least 10 characters"
   },
   {
-    "timestamp": "2026-11-05T02:31:09+00:00",
+    "timestamp": "2026-11-05T02:39:26+00:00",
     "creator_id": "cap1_short_1",
     "event": "rejected",
     "status": "rejected",
     "reason": "text_too_short",
-    "limit": "text must contain at least a few sentences"
+    "limit": "text must be at least 10 characters"
   },
   {
-    "timestamp": "2026-11-05T02:31:09+00:00",
+    "timestamp": "2026-11-05T02:39:26+00:00",
     "creator_id": "cap1_short_2",
     "event": "rejected",
     "status": "rejected",
     "reason": "text_too_short",
-    "limit": "text must contain at least a few sentences"
+    "limit": "text must be at least 10 characters"
   },
   {
-    "timestamp": "2026-11-05T02:31:09+00:00",
+    "timestamp": "2026-11-05T02:39:26+00:00",
     "creator_id": "cap1_short_3",
     "event": "rejected",
     "status": "rejected",
     "reason": "text_too_short",
-    "limit": "text must contain at least a few sentences"
+    "limit": "text must be at least 10 characters"
   },
   {
-    "timestamp": "2026-11-05T02:31:09+00:00",
+    "timestamp": "2026-11-05T02:39:26+00:00",
     "creator_id": "cap1_short_4",
     "event": "rejected",
     "status": "rejected",
     "reason": "text_too_short",
-    "limit": "text must contain at least a few sentences"
+    "limit": "text must be at least 10 characters"
   },
   {
-    "timestamp": "2026-11-05T02:31:09+00:00",
-    "content_id": "cnt_6f964110",
+    "timestamp": "2026-11-05T02:39:26+00:00",
+    "content_id": "cnt_54fd744d",
     "creator_id": "cap1_valid_0",
     "guess": "ai",
     "model_score": 0.5537,
@@ -603,8 +603,8 @@ Malformed-body rejections logged: 5. Too-short rejections logged: 5.
     "confidence": 0.5338
   },
   {
-    "timestamp": "2026-11-05T02:31:09+00:00",
-    "content_id": "cnt_468b6b85",
+    "timestamp": "2026-11-05T02:39:27+00:00",
+    "content_id": "cnt_229115f3",
     "creator_id": "cap1_valid_1",
     "guess": "human",
     "model_score": 0.0918,
@@ -615,8 +615,8 @@ Malformed-body rejections logged: 5. Too-short rejections logged: 5.
     "confidence": 0.1675
   },
   {
-    "timestamp": "2026-11-05T02:31:09+00:00",
-    "content_id": "cnt_a6b0c4e4",
+    "timestamp": "2026-11-05T02:39:27+00:00",
+    "content_id": "cnt_6e7c0180",
     "creator_id": "cap1_valid_2",
     "guess": "human",
     "model_score": 0.3937,
@@ -627,8 +627,8 @@ Malformed-body rejections logged: 5. Too-short rejections logged: 5.
     "confidence": 0.4259
   },
   {
-    "timestamp": "2026-11-05T02:31:09+00:00",
-    "content_id": "cnt_6f69b6f2",
+    "timestamp": "2026-11-05T02:39:27+00:00",
+    "content_id": "cnt_25c7be8c",
     "creator_id": "cap1_valid_3",
     "guess": "human",
     "model_score": 0.4725,
@@ -639,8 +639,8 @@ Malformed-body rejections logged: 5. Too-short rejections logged: 5.
     "confidence": 0.424
   },
   {
-    "timestamp": "2026-11-05T02:31:10+00:00",
-    "content_id": "cnt_68c4a0fb",
+    "timestamp": "2026-11-05T02:39:27+00:00",
+    "content_id": "cnt_f51ab988",
     "creator_id": "cap1_valid_4",
     "guess": "human",
     "model_score": 0.4551,
@@ -651,7 +651,7 @@ Malformed-body rejections logged: 5. Too-short rejections logged: 5.
     "confidence": 0.3636
   },
   {
-    "timestamp": "2026-11-05T02:31:10+00:00",
+    "timestamp": "2026-11-05T02:39:27+00:00",
     "creator_id": "unknown",
     "event": "rejected",
     "status": "rejected",
@@ -659,7 +659,7 @@ Malformed-body rejections logged: 5. Too-short rejections logged: 5.
     "limit": "body must be a JSON object"
   },
   {
-    "timestamp": "2026-11-05T02:31:10+00:00",
+    "timestamp": "2026-11-05T02:39:27+00:00",
     "creator_id": "unknown",
     "event": "rejected",
     "status": "rejected",
@@ -667,7 +667,7 @@ Malformed-body rejections logged: 5. Too-short rejections logged: 5.
     "limit": "body must be a JSON object"
   },
   {
-    "timestamp": "2026-11-05T02:31:10+00:00",
+    "timestamp": "2026-11-05T02:39:27+00:00",
     "creator_id": "unknown",
     "event": "rejected",
     "status": "rejected",
@@ -675,7 +675,7 @@ Malformed-body rejections logged: 5. Too-short rejections logged: 5.
     "limit": "body must be a JSON object"
   },
   {
-    "timestamp": "2026-11-05T02:31:10+00:00",
+    "timestamp": "2026-11-05T02:39:27+00:00",
     "creator_id": "unknown",
     "event": "rejected",
     "status": "rejected",
@@ -683,7 +683,7 @@ Malformed-body rejections logged: 5. Too-short rejections logged: 5.
     "limit": "body must be a JSON object"
   },
   {
-    "timestamp": "2026-11-05T02:31:10+00:00",
+    "timestamp": "2026-11-05T02:39:27+00:00",
     "creator_id": "unknown",
     "event": "rejected",
     "status": "rejected",
@@ -691,44 +691,44 @@ Malformed-body rejections logged: 5. Too-short rejections logged: 5.
     "limit": "body must be a JSON object"
   },
   {
-    "timestamp": "2026-11-05T02:31:10+00:00",
+    "timestamp": "2026-11-05T02:39:27+00:00",
     "creator_id": "cap1_lat_0",
     "event": "rejected",
     "status": "rejected",
     "reason": "text_too_short",
-    "limit": "text must contain at least a few sentences"
+    "limit": "text must be at least 10 characters"
   },
   {
-    "timestamp": "2026-11-05T02:31:10+00:00",
+    "timestamp": "2026-11-05T02:39:27+00:00",
     "creator_id": "cap1_lat_1",
     "event": "rejected",
     "status": "rejected",
     "reason": "text_too_short",
-    "limit": "text must contain at least a few sentences"
+    "limit": "text must be at least 10 characters"
   },
   {
-    "timestamp": "2026-11-05T02:31:10+00:00",
+    "timestamp": "2026-11-05T02:39:27+00:00",
     "creator_id": "cap1_lat_2",
     "event": "rejected",
     "status": "rejected",
     "reason": "text_too_short",
-    "limit": "text must contain at least a few sentences"
+    "limit": "text must be at least 10 characters"
   },
   {
-    "timestamp": "2026-11-05T02:31:10+00:00",
+    "timestamp": "2026-11-05T02:39:27+00:00",
     "creator_id": "cap1_lat_3",
     "event": "rejected",
     "status": "rejected",
     "reason": "text_too_short",
-    "limit": "text must contain at least a few sentences"
+    "limit": "text must be at least 10 characters"
   },
   {
-    "timestamp": "2026-11-05T02:31:10+00:00",
+    "timestamp": "2026-11-05T02:39:27+00:00",
     "creator_id": "cap1_lat_4",
     "event": "rejected",
     "status": "rejected",
     "reason": "text_too_short",
-    "limit": "text must contain at least a few sentences"
+    "limit": "text must be at least 10 characters"
   }
 ]
 ```

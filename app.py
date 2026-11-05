@@ -232,6 +232,22 @@ def submit():
             "message": "'creator_id' is required.",
         }), 400
 
+    # Check length here, before the model runs. The except below stays as a
+    # backstop, but it only fires for text under 3 tokens.
+    if len(text.strip()) < config.MIN_TEXT_CHARS:
+        audit.log_rejection(
+            creator_id=creator_id or "unknown",
+            reason="text_too_short",
+            limit=f"text must be at least {config.MIN_TEXT_CHARS} characters",
+        )
+        return jsonify({
+            "error": "invalid_input",
+            "message": (
+                f"Text is too short to score: please submit at least "
+                f"{config.MIN_TEXT_CHARS} characters (a few sentences works best)."
+            ),
+        }), 400
+
     content_id = f"cnt_{uuid.uuid4().hex[:8]}"
 
     # Milestone 5: two signals, combined, mapped to a reader-facing label.

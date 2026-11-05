@@ -1335,3 +1335,62 @@ Produced by `eval_capstone.py::run_trial` executing against `app.py::submit` and
   }
 }
 ```
+
+
+---
+
+<!-- ═══════════════════════ CAPSTONE MILESTONE 6: DIAGNOSE AND IMPROVE ═══════════════════════ -->
+
+## Capstone Diagnoses
+
+All five criteria were MET in all three trials, so there is no miss to diagnose. What follows is the stage and mechanism behind each MET, so the verdicts say why they held, not only that they did.
+
+- **Criterion 1 (non-object JSON body returns 400): stage: the route.** The original crash (RQ07) was `payload.get` raising `AttributeError` on a list. Both `app.py::submit` and `app.py::appeal` now read the body with `request.get_json(silent=True)` and return a 400 if it parsed but isn't a `dict`, before touching any field. The rate limiter's key function already had the same guard, so a list body no longer fails anywhere on the path.
+- **Criterion 2 (single-character text returns 400): stage: signal one's exception, handled in the route.** `detector.py::perplexity` raises `ValueError` when text is under 3 tokens, and that used to escape as a 500 (MF02). `submit` now catches it and returns a 400. The stylometry signal never raised on short text.
+- **Criterion 3 (rejections are in the audit log): stage: audit logging.** Each rejection branch in `submit` calls `audit.log_rejection(...)` with a `reason` (`malformed_payload_not_json_object` or `text_too_short`) before returning. The criterion counts 10 expected entries per trial (5 of each) and found all 10 each time. Gap: `appeal()` returns its 400s without logging them, and criterion 3 doesn't cover that route.
+- **Criterion 4 (legitimate submissions still evaluated): stage: the route, unchanged happy path.** The new checks all sit before the model call and fall through for valid input, so five ordinary texts still returned 200 with `model_score`, `style_score`, `combined_score` and `label`. This is the check that the hardening didn't break the service.
+- **Criterion 5 (error handling under 50 ms): stage: the route, early return.** Every rejection returns before the model or stylometry run, so the cost is JSON parsing and one log write, about 2 ms, with a maximum of 2.8 ms. This does not include the model's 8 to 12 second load on the first valid request after a start.
+
+**Why "all MET" needs a caveat.** I wrote these criteria after I had built the fixes, so they test exactly what I fixed. Passing them shows the defenses work on those inputs. It does not show there are no other crashes. The 5-body and 5-text sets are small.
+
+## The One Improvement
+
+**What changed:** `submit()` in `app.py` now checks the text length itself, before `detector.model_signal` runs. If the trimmed text is under `MIN_TEXT_CHARS` characters (new setting in `config.py`, value `10`), it logs a `text_too_short` rejection and returns a 400 with a standard message: "Text is too short to score: please submit at least 10 characters (a few sentences works best)." The `except ValueError` stays as a backstop.
+
+**Why, and what it targets:** the backstop only catches text of under 3 tokens, and that is the model's limit, not a product decision. Short inputs just above that limit were scored and labelled from almost no evidence. The old route labelled "I ran." (6 characters) as high-confidence human with a combined score of 0.1795. The new check answers short text with a clear 400 rather than relying on whatever the detector happens to raise.
+
+## Capstone Run Log — Before vs After
+
+Same script (`eval_capstone.py`), same inputs, three trials each. Before is `results/capstone_run_eval_before.md`, after is `results/capstone_run_eval_after.md`.
+
+| Criterion | Target | Before (Run 1 / 2 / 3) | After (Run 1 / 2 / 3) | Verdict before → after |
+|---|---|---|---|---|
+| 1. Non-object JSON body returns 400 | 5 of 5 | 5/5, 5/5, 5/5 | 5/5, 5/5, 5/5 | MET → MET |
+| 2. Single-character text returns 400 | 5 of 5 | 5/5, 5/5, 5/5 | 5/5, 5/5, 5/5 | MET → MET |
+| 3. Rejections are in the audit log | 10 of 10 | 10/10, 10/10, 10/10 | 10/10, 10/10, 10/10 | MET → MET |
+| 4. Legitimate submissions evaluated | 5 of 5 | 5/5, 5/5, 5/5 | 5/5, 5/5, 5/5 | MET → MET |
+| 5. Error handling under 50 ms | at least 9 of 10 | 10/10 (max 2.5 / 2.4 / 2.8 ms) | 10/10 (max 2.8 / 3.7 / 2.9 ms) | MET → MET |
+
+Latency of the error paths in trial 1: single-character requests averaged 1.94 ms before and 2.02 ms after; non-object bodies averaged 2.00 ms before and 2.37 ms after. The numbers are from 5 requests each, so the differences are within noise.
+
+**What the new check does to short inputs.** The criteria don't measure this, so I probed these inputs separately (before = the old route logic, after = a real request):
+
+| Input | Characters | Before | After |
+|---|---|---|---|
+| `Hi`, `Yes.`, `ok then`, `Thanks!`, `Hi there` | 2 to 8 | 400 (caught `ValueError`) | 400 (new check) |
+| `I ran.` | 6 | 200, combined 0.1795, "strong personal style" label | 400 |
+| `No way!!` | 8 | 200, combined 0.1805, "strong personal style" label | 400 |
+| `Good job.` | 9 | 200, combined 0.2338, "strong personal style" label | 400 |
+| `Not today.`, `It rained.` | 10 | 200, scored | 200, scored (0.2309 and 0.4642) |
+
+## Did It Help, and What It Cost
+
+It helped where the criteria can't see: it stopped three kinds of 6 to 9 character input from getting a confident-looking human label, and it moved short-text handling out of an exception and into an explicit rule, at no measurable latency cost. It did not change any criterion's result, because all five were already met.
+
+- **What it fixed:** inputs of 6 to 9 characters that the detector could technically score now get a clear 400, instead of a high-confidence label from a handful of tokens.
+- **Latency:** no measurable change. Mean error-path time stayed about 2 ms before and after (1.97 ms and 2.19 ms across trial 1's ten requests).
+- **What it cost:**
+  - The cutoff is arbitrary. 10 characters is a floor, and "Not today." (10 characters) is still scored and labelled "strong personal style" from almost nothing. The rule moves the line; it doesn't fix thin evidence.
+  - A real but very short submission of 9 characters or fewer is now rejected. On a writing site that could be a short poem line.
+  - There are now two short-text checks. The `ValueError` backstop is no longer exercised by my eval, because the new check catches those inputs first, so the backstop is untested.
+  - The 400 message changed. Anything that matched the old "a few sentences at least" wording would break; the eval only checks the status code.

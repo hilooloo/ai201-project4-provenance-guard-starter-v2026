@@ -46,6 +46,12 @@ DETECTOR_MODEL = os.getenv("AI201_DETECTOR_MODEL", "gpt2")
 # 300 words, which is enough for the signal to mean something.
 DETECTOR_MAX_TOKENS = 400
 
+# The shortest text /submit will score, in characters after trimming. Below this
+# the route answers 400 before the model runs. The detector's own check only
+# catches texts of under 3 tokens; a few words more and it returns a confident
+# score from almost no evidence.
+MIN_TEXT_CHARS = 10
+
 
 # ─── Scoring (Milestone 4) ───────────────────────────────────────────────────
 # How much each signal counts toward the combined score.

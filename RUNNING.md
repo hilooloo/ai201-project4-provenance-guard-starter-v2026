@@ -75,7 +75,7 @@ curl -X POST http://127.0.0.1:5000/submit \
 ```
 
 ```json
-{"error": "invalid_input", "message": "Text is too short to score — a few sentences at least."}
+{"error": "invalid_input", "message": "Text is too short to score: please submit at least 10 characters (a few sentences works best)."}
 ```
 
 `POST /appeal` has the same non-object check, so `-d '[1, 2]'` sent to `/appeal`
