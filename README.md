@@ -221,6 +221,12 @@ curl.exe "http://127.0.0.1:5000/log?limit=2"
 - *What came back:* Claude wrote the Flask route handling JSON payloads, checking existing entries via `audit.entries_for()`, calling `audit.log_appeal()`, and returning a 200 response.
 - *What I changed:* I added explicit 400 validation checks to ensure both `content_id` and `reasoning` fields are provided and non-empty before querying the audit log.
 
+**Moment 3 (unit 8)**
+
+- *What I asked for:* I asked Claude to analyze my test logs, parse the three-trial eval outputs, compute the before/after metric comparisons, and check my diagnoses against the pipeline code.
+- *What came back:* Claude parsed `results/` and `logs/audit.jsonl` and produced the per-trial numbers and the before/after tables. It also traced each diagnosis to a line in the code, and several of my first explanations didn't match.
+- *What I changed:* I corrected the diagnoses (MF02's `ValueError` comes from `detector.py`, not stylometry; RQ07 crashes inside `submit`; the two false positives were plain writing, not formal), marked Criterion 2 as MISSED because 0.3353 is under 0.35, and ran 10 more appeals so `logs/audit.jsonl` backs up Criterion 4 across all three trials.
+
 <!-- ═══════════════════════ UNIT 8 — THE TEST ═══════════════════════ -->
 
 ---
@@ -1025,14 +1031,18 @@ It helped on the two criteria it targeted and cost some AI sensitivity: it moved
 <!-- For each attack still getting through and each criterion still missed:
      what you'd do, and why you stopped. -->
 
+**Broken attacks still broken: MF02 and RQ07.** Both still return HTTP 500. The fix is route validation in `app.py::submit`: return a 400 when the body isn't a JSON object (RQ07, and the same line in `appeal()`), and catch the `ValueError` from `detector.py::perplexity` on very short text and return a 400 (MF02). I stopped because Milestone 5 allows one change at a time, so the single measured change went to the label threshold and I left the route alone.
 
+**False positives still getting through: FP02 to FP07.** All six are still labelled "high-confidence AI" after the fix, scoring 0.7161 to 0.7866. Their model scores are all high (0.7387 to 0.8816), so the main driver is signal one, and moving the threshold again would only trade away more real AI detections. Signal two varies more (0.4762 to 0.7421), so a fix would involve reworking its metrics and reweighting the combining rule. I did not do that, to keep the one-variable comparison clean.
+
+**Criterion 2 still missed (0.3353 against 0.35).** The AI mean (0.7758) minus the human mean (0.4405) is a raw-score gap, so it doesn't change when a label threshold moves. Closing it takes a stronger signal two or a different weighting of the signals (`MODEL_WEIGHT` and `STYLE_WEIGHT` in `config.py`). I deferred that for the same single-variable reason.
 
 **The trade I'd make if this ran for real:**
 
 <!-- Two sentences. Fewer wrong accusations means more AI text getting through.
      Say which way you'd go and WHO PAYS FOR IT. -->
 
-
+In a real provenance system such as academic integrity, I would prioritize minimizing false accusations over catching every AI text. I would accept a heavier manual review workload for "unsure" texts and some missed AI, because falsely accusing an innocent human creator carries a far higher ethical cost than letting a piece of AI text through. The people who pay for this choice are the reviewers, who get more "unsure" cases, and the platform, which misses some AI text.
 
 <!-- ═════════════════════════════════════════════════════════════════════
 
