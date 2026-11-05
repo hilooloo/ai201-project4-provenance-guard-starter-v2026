@@ -118,3 +118,32 @@ Public-facing endpoints must handle bad or malformed client payloads gracefully.
      A number you missed stays where it is, gets diagnosed, and gets a fix
      attempted. That's where the points are.
      ───────────────────────────────────────────────────────────────────────── -->
+
+
+---
+
+<!-- ═══════════════════════ THE CAPSTONE CRITERIA ═══════════════════════ -->
+
+# The Capstone Acceptance Criteria
+
+Five acceptance criteria for Shape B (Harden against failure), written before code execution.
+
+## 1. Malformed JSON payload returns HTTP 400
+- **Target:** 5 of 5 trials (100%)
+- **Reason:** When a client sends a JSON array instead of a JSON object (like attack RQ07), the server must return a structured 400 Bad Request rather than crashing with an unhandled 500 AttributeError.
+
+## 2. Ultra-short text returns HTTP 400 without crashing
+- **Target:** 5 of 5 trials (100%)
+- **Reason:** When text contains fewer than 3 tokens (such as a single character like attack MF02), the language model cannot compute perplexity. The API route must catch this ValueError and return a 400 error response instead of an uncaught 500 crash.
+
+## 3. Rejected malformed requests are recorded in the audit log
+- **Target:** 10 of 10 rejected requests (100%)
+- **Reason:** Complete auditability is required for security and observability. Every rejected bad-path request (400) must produce an audit log entry in logs/audit.jsonl with a timestamp, creator_id or client IP, and the rejection reason.
+
+## 4. Legitimate human submissions continue to receive valid evaluations
+- **Target:** 5 of 5 trials (100%)
+- **Reason:** Hardening the service must not break existing core functionality (regression prevention). Standard text payloads with creator_id must return HTTP 200 with complete model_score, style_score, and combined_score.
+
+## 5. End-to-end latency for error handling remains under 50 milliseconds
+- **Target:** 9 of 10 error requests respond in under 50ms
+- **Reason:** Input validation checks occur at the route boundary before running the expensive GPT-2 model or stylometric analysis. Handled errors should return almost immediately to conserve compute resources.
