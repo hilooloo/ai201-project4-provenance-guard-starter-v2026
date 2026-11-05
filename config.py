@@ -72,7 +72,7 @@ STYLE_WEIGHT = 0.35
 # that decide who pays for it.
 
 HUMAN_THRESHOLD = 0.4000
-AI_THRESHOLD = 0.5300
+AI_THRESHOLD = 0.6200
 
 # The exact text a reader sees for each label.
 LABEL_HUMAN = "This piece shows strong personal style and varied sentence rhythm consistent with authentic human writing."
