@@ -889,7 +889,18 @@ Everything below is Trial 1, copied from `results/run_2026-11-04_2014_before.md`
 
      Look for a pattern. Five failures on one signal is one problem, not five. -->
 
+**Broken attacks (HTTP 500)**
 
+- **MF02 (text is a single character) — stage: signal one, uncaught in the route.** The route's check only rejects empty or whitespace-only text, so a one-character string passes it. `detector.py::perplexity` then raises `ValueError("Text is too short to score — a few sentences at least.")` because fewer than 3 tokens can't be scored, and `app.py::submit` has no `try/except` around `detector.model_signal`. The exception escapes as a 500 and nothing is written to `logs/audit.jsonl`. The stylometry signal is not the cause; it handles short text without raising. Fix: catch the `ValueError` in `submit` and return a 400 with an explanatory message (and log the rejection).
+- **RQ07 (body is a JSON array) — stage: the route.** `request.get_json(silent=True) or {}` returns the list as is, because a non-empty list is truthy, so `payload.get("text")` raises `AttributeError: 'list' object has no attribute 'get'`. The rate limiter's key function already guards against non-dict bodies, so the crash is in the handler's own line in `app.py::submit`, not before it. `appeal()` has the same line and the same weakness. Fix: if the payload isn't a dict, return a 400 before reading any field.
+
+**Missed criteria**
+
+All three missed criteria trace back to the same cause: signal one (`model_score`) reads plain, predictable writing as AI, and it carries 65% of the combined score.
+
+- **Criterion 1 (2/10 labelled AI, target at most 1) — stage: signal one, amplified by the combining rule.** The two flagged human texts were the missed-bus story (combined 0.5965; model 0.6333, style 0.5283) and the first-story text (combined 0.562; model 0.6201, style 0.4542). Both have a model score above 0.62, and `MODEL_WEIGHT = 0.65` carried them over the 0.53 threshold. For the second text, style (0.4542) was below the threshold on its own, so signal one alone pushed it into "high-confidence AI". These are not formal texts. They are ordinary, plain personal writing, which is the blind spot I named for signal one. All three trials gave identical results, so this is not noise.
+- **Criterion 2 (separation 0.3353, target at least 0.35) — stage: signal two, plus one text on signal one.** The AI mean was 0.7758 and the human mean 0.4405. The combined difference is a weighted average of the two signals' differences: signal one separated the groups by about 0.37 (0.8416 vs 0.4734) and signal two by about 0.27 (0.6534 vs 0.3794). Stylometry separates less, so it pulls the combined gap below the model signal's 0.37, and no weighting can push the combined gap above signal one's own. The human mean was also lifted by the missed-bus text (0.5965).
+- **Criterion 3 (0 "unsure" labels, target at least 2 each) — stage: signal one and the label mapping.** The 15 texts split into human 4 and AI 11, with 0 in the "unsure" band (0.4001–0.5300). All five borderline texts scored well above 0.53 (0.5721, 0.6373, 0.705, 0.6281, 0.7405), because plain writing gets a model score of 0.68–0.86 and so reads as AI. The band is reachable: three human texts from the criterion 1 set did land in "unsure" (0.4033, 0.4911, 0.4106). So the label can be produced, but this test set didn't land any text in the band. The band is also only 0.13 wide, and widening it up to 0.53 alone would not have captured these five.
 
 ---
 
