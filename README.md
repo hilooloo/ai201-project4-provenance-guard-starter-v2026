@@ -1099,3 +1099,129 @@ In a real provenance system such as academic integrity, I would prioritize minim
 ---
 
 📖 **How to run this project: [RUNNING.md](RUNNING.md)**
+
+
+---
+
+<!-- ═══════════════════════ CAPSTONE INSTRUMENTATION & COST ═══════════════════════ -->
+
+## Instrumentation
+
+Below are 10 real structured audit log entries recorded in logs/audit.jsonl following the hardening extensions. They show both successful evaluations and defensive rejections (such as ultra-short inputs and non-object JSON payloads) handled cleanly with HTTP 400 responses:
+
+```json
+[
+  {
+    "timestamp": "2026-11-05T02:19:31+00:00",
+    "content_id": "cnt_92476330",
+    "creator_id": "bench_valid_0",
+    "guess": "ai",
+    "model_score": 0.5537,
+    "style_score": 0.4968,
+    "combined_score": 0.5338,
+    "label": "This text presents mixed stylistic and structural signals, so its authorship cannot be determined reliably.",
+    "status": "decided",
+    "confidence": 0.5338
+  },
+  {
+    "timestamp": "2026-11-05T02:19:32+00:00",
+    "content_id": "cnt_d1d36f81",
+    "creator_id": "bench_valid_1",
+    "guess": "human",
+    "model_score": 0.0918,
+    "style_score": 0.3081,
+    "combined_score": 0.1675,
+    "label": "This piece shows strong personal style and varied sentence rhythm consistent with authentic human writing.",
+    "status": "decided",
+    "confidence": 0.1675
+  },
+  {
+    "timestamp": "2026-11-05T02:19:32+00:00",
+    "content_id": "cnt_9bbcd342",
+    "creator_id": "bench_valid_2",
+    "guess": "ai",
+    "model_score": 0.7291,
+    "style_score": 0.5732,
+    "combined_score": 0.6745,
+    "label": "This piece displays uniform rhythm and predictable patterns commonly produced by automated language models.",
+    "status": "decided",
+    "confidence": 0.6745
+  },
+  {
+    "timestamp": "2026-11-05T02:19:32+00:00",
+    "content_id": "cnt_73a9a752",
+    "creator_id": "bench_valid_3",
+    "guess": "human",
+    "model_score": 0.1922,
+    "style_score": 0.5045,
+    "combined_score": 0.3015,
+    "label": "This piece shows strong personal style and varied sentence rhythm consistent with authentic human writing.",
+    "status": "decided",
+    "confidence": 0.3015
+  },
+  {
+    "timestamp": "2026-11-05T02:19:32+00:00",
+    "creator_id": "bench_short_0",
+    "event": "rejected",
+    "status": "rejected",
+    "reason": "text_too_short",
+    "limit": "text must contain at least a few sentences"
+  },
+  {
+    "timestamp": "2026-11-05T02:19:32+00:00",
+    "creator_id": "bench_short_1",
+    "event": "rejected",
+    "status": "rejected",
+    "reason": "text_too_short",
+    "limit": "text must contain at least a few sentences"
+  },
+  {
+    "timestamp": "2026-11-05T02:19:32+00:00",
+    "creator_id": "bench_short_2",
+    "event": "rejected",
+    "status": "rejected",
+    "reason": "text_too_short",
+    "limit": "text must contain at least a few sentences"
+  },
+  {
+    "timestamp": "2026-11-05T02:19:32+00:00",
+    "creator_id": "unknown",
+    "event": "rejected",
+    "status": "rejected",
+    "reason": "malformed_payload_not_json_object",
+    "limit": "body must be a JSON object"
+  },
+  {
+    "timestamp": "2026-11-05T02:19:32+00:00",
+    "creator_id": "unknown",
+    "event": "rejected",
+    "status": "rejected",
+    "reason": "malformed_payload_not_json_object",
+    "limit": "body must be a JSON object"
+  },
+  {
+    "timestamp": "2026-11-05T02:19:32+00:00",
+    "creator_id": "unknown",
+    "event": "rejected",
+    "status": "rejected",
+    "reason": "malformed_payload_not_json_object",
+    "limit": "body must be a JSON object"
+  }
+]
+```
+
+## What It Costs
+
+**Measured Cost:** Mean compute time of 54.9 milliseconds per request (median: 3.1 ms, total: 0.549 seconds across 10 sequential calls).
+
+**Breakdown by Request Type:**
+
+- Valid text submissions (evaluation path): mean 133.7 ms (range: 122.6 – 142.9 ms)
+- Single-character inputs (defended short-text path): mean 2.9 ms
+- Non-object malformed JSON payloads (defended type-check path): mean 1.8 ms
+
+**Measurement Methodology:**
+
+- Measured local CPU compute duration using Python `time.perf_counter()` wrapping Flask test client calls (`app.test_client().post("/submit", ...)`).
+- Tested 10 sequential requests (4 valid, 3 single-character, 3 malformed non-object JSON bodies) with unique `creator_id` keys to avoid triggering the rate limiter.
+- One warm-up call (7.90 seconds) was performed beforehand to load the GPT-2 model into memory so cold-start initialization was separated from steady-state request timing.

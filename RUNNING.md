@@ -8,6 +8,91 @@ assumed — the starter ships one that already answers.
 
 ---
 
+## Capstone extension: run it locally, with logs
+
+This is how the finished Provenance Guard (Shape B, harden against failure) runs.
+It is the "local, with logs" setup described under unit 9 below: the model is too
+big for a free host, so the service runs on your own machine and keeps its own
+audit log.
+
+**Requirements**
+
+- Python 3.12 (3.11 and 3.13 also work; not 3.14)
+- A virtual environment in `.venv`
+- The packages in `requirements.txt`, including the roughly 550 MB GPT-2 download on first use
+
+```bash
+python -m venv .venv
+source .venv/bin/activate          # Windows: .venv\Scripts\Activate.ps1
+pip install -r requirements.txt
+python test.py                     # you're ready when this passes
+```
+
+**Start the service**
+
+```bash
+python app.py
+```
+
+It runs at **http://127.0.0.1:5000** and prints the model, whether rate limiting is
+on, and the audit log path. The first `/submit` after a start takes several
+seconds while the model loads into memory; later ones take about 130 ms. Rate
+limiting is on by default (10 per minute and 200 per day, counted per `creator_id`).
+
+**Check it works.** On Windows use `curl.exe` and keep each command on one line,
+with `\"` around quotes inside the JSON (see the note under *Your first five
+minutes*). Git Bash and macOS/Linux use plain `curl` and normal quotes.
+
+A normal submission returns `200` with `content_id`, `guess`, `confidence`,
+`label`, `model_score`, `style_score` and `combined_score`:
+
+```bash
+curl -X POST http://127.0.0.1:5000/submit \
+  -H "Content-Type: application/json" \
+  -d '{"text": "I walked along the quiet country road this morning, listening to the birds in the maple trees.", "creator_id": "me"}'
+```
+
+Two bad requests that used to crash the service with a `500` now return a clean `400`.
+
+A body that is valid JSON but not an object (here, an array):
+
+```bash
+curl -X POST http://127.0.0.1:5000/submit \
+  -H "Content-Type: application/json" \
+  -d '[1, 2]'
+```
+
+```json
+{"error": "invalid_input", "message": "Request body must be a valid JSON object."}
+```
+
+Text too short to score (here, a single character):
+
+```bash
+curl -X POST http://127.0.0.1:5000/submit \
+  -H "Content-Type: application/json" \
+  -d '{"text": "a", "creator_id": "me"}'
+```
+
+```json
+{"error": "invalid_input", "message": "Text is too short to score — a few sentences at least."}
+```
+
+`POST /appeal` has the same non-object check, so `-d '[1, 2]'` sent to `/appeal`
+returns the same `400`.
+
+**Where the logs are:** `logs/audit.jsonl`, one JSON object per line. It records
+every decision, every appeal, and every rejection (rate limits, non-object
+bodies, too-short text). Read it with:
+
+```bash
+curl "http://127.0.0.1:5000/log?limit=10"
+```
+
+Commit `logs/` and `results/`; they are evidence, not clutter.
+
+---
+
 ## Before your first class
 
 ```bash
@@ -76,8 +161,8 @@ curl -X POST http://127.0.0.1:5000/submit \
   -d '{"text": "some writing", "creator_id": "me"}'
 ```
 
-It returns a `501` saying it isn't built yet. **That's the correct starting
-position.**
+In the starter this returned a `501` saying it wasn't built yet. In this repo it
+is built and returns a real decision (see the capstone section above).
 
 ---
 
@@ -88,8 +173,8 @@ position.**
 | `POST /ping` | **works** | The example. Don't edit it |
 | `GET /health` | **works** | Is the service up, is the model loaded |
 | `GET /log` | **works** | The audit log, as JSON |
-| `POST /submit` | **you build it** | Milestones 3, 4, 5 |
-| `POST /appeal` | **you build it** | Milestone 5 |
+| `POST /submit` | **built** | Two signals, a combined score and a label; bad input gets a `400` |
+| `POST /appeal` | **built** | Records an appeal and moves the item to `under_review` |
 
 ---
 
@@ -239,10 +324,10 @@ your write-up; that's the deliverable.
 | File | What it does |
 |---|---|
 | `config.py` | Every setting: thresholds, weights, rate limits, the model |
-| `app.py` | The service. `/ping` and `/log` work; `/submit` and `/appeal` are yours |
+| `app.py` | The service: `/ping`, `/health`, `/log`, `/submit`, `/appeal` |
 | `detector.py` | Signal one — the local model. Given to you |
-| `stylometry.py` | Signal two. **Stubs — you build these** |
-| `scoring.py` | Combining and labelling. **Stubs — you build these** |
+| `stylometry.py` | Signal two: sentence spread, vocabulary variety, punctuation |
+| `scoring.py` | Combining the signals and mapping a score to a label |
 | `audit.py` | The audit log writer. Given to you |
 | `run_attacks.py` | Runs the attack set — **unit 8** |
 | `run_eval.py` | Runs your criteria three times — **unit 8** |
@@ -279,7 +364,7 @@ sentences, a pasted quotation. That is very cheap to do on purpose.
 
 | What you see | What it means |
 |---|---|
-| `501 not_implemented` | Correct at the start — that's the TODO in `app.py` |
+| `400 invalid_input` | Working as intended: the body wasn't a JSON object, a field was missing, or the text was too short to score. The `message` says which |
 | `404` from curl | Is the server running? Is the path exactly what you typed? |
 | `Cannot bind parameter 'Headers'` | You're in PowerShell, where `curl` is a different tool. Use `curl.exe`, on one line |
 | Request body arrives empty | curl needs `-H "Content-Type: application/json"` |
