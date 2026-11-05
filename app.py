@@ -202,7 +202,21 @@ def submit():
     what should this do when `text` is missing, empty, or enormous? A crash on
     a malformed input is one of the most common real failures there is.
     """
-    payload = request.get_json(silent=True) or {}
+    body = request.get_json(silent=True)
+    # Valid JSON that isn't an object (a list, a bare string, a number) has no
+    # .get and used to crash this route with a 500. Unparseable or empty bodies
+    # (None) still fall through to the field checks below.
+    if body is not None and not isinstance(body, dict):
+        audit.log_rejection(
+            creator_id="unknown",
+            reason="malformed_payload_not_json_object",
+            limit="body must be a JSON object",
+        )
+        return jsonify({
+            "error": "invalid_input",
+            "message": "Request body must be a valid JSON object.",
+        }), 400
+    payload = body or {}
 
     text = payload.get("text")
     creator_id = payload.get("creator_id")
@@ -271,7 +285,13 @@ def appeal():
     to the person on the other end. It's the only thing standing between a
     wrong accusation and nothing at all.
     """
-    payload = request.get_json(silent=True) or {}
+    body = request.get_json(silent=True)
+    if body is not None and not isinstance(body, dict):
+        return jsonify({
+            "error": "invalid_input",
+            "message": "Request body must be a valid JSON object.",
+        }), 400
+    payload = body or {}
     content_id = payload.get("content_id")
     reasoning = payload.get("reasoning", "")
 
