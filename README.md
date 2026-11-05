@@ -246,6 +246,12 @@ curl.exe "http://127.0.0.1:5000/log?limit=2"
 - *What came back:* Claude parsed `results/` and `logs/audit.jsonl` and produced the per-trial numbers and the before/after tables. It also traced each diagnosis to a line in the code, and several of my first explanations didn't match.
 - *What I changed:* I corrected the diagnoses (MF02's `ValueError` comes from `detector.py`, not stylometry; RQ07 crashes inside `submit`; the two false positives were plain writing, not formal), marked Criterion 2 as MISSED because 0.3353 is under 0.35, and ran 10 more appeals so `logs/audit.jsonl` backs up Criterion 4 across all three trials.
 
+**Moment 4 (unit 9 — capstone)**
+
+- *What I asked for:* I asked Claude to help scaffold defensive route validation for non-dict payloads and ultra-short texts, create `eval_capstone.py` for the 3-trial test harness, and implement the proactive `MIN_TEXT_CHARS` check.
+- *What came back:* Claude provided route exception handling, automated test client runners, and the before/after latency comparisons.
+- *What I changed:* I verified that error rejections properly wrote to `logs/audit.jsonl` with distinct event reasons (criterion 3 counts them). I did not re-run `run_attacks.py` or `run_eval.py` after the `MIN_TEXT_CHARS` change, so I have not confirmed that the unit 7 and 8 results still hold. The cutoff did change one standard response: the short-text 400 message now reads "Text is too short to score: please submit at least 10 characters", where it used to quote the detector's error.
+
 <!-- ═══════════════════════ UNIT 8 — THE TEST ═══════════════════════ -->
 
 ---
@@ -1226,6 +1232,15 @@ Below are 10 real structured audit log entries recorded in logs/audit.jsonl foll
 - Tested 10 sequential requests (4 valid, 3 single-character, 3 malformed non-object JSON bodies) with unique `creator_id` keys to avoid triggering the rate limiter.
 - One warm-up call (7.90 seconds) was performed beforehand to load the GPT-2 model into memory so cold-start initialization was separated from steady-state request timing.
 
+**Daily cost for 100 writers** (the arithmetic):
+
+- 100 writers submit an average of 5 drafts a day: 100 × 5 = **500 requests per day**.
+- At 133.7 ms per valid evaluation: 500 × 0.1337 s = **66.85 seconds** of compute per day.
+- Add a 20% error load, meaning 100 rejected bad requests at about 2.1 ms each: 100 × 0.0021 s = **0.21 seconds**.
+- Total active compute is about **67.06 seconds per day**, which is 67.06 ÷ 86,400 = about **0.08% of one CPU core**.
+
+The compute itself is tiny, but I can't honestly turn it into "pennies per day". A host bills for a server that stays up, not for CPU seconds, and this service needs room for the model in memory (see `RUNNING.md` on why it doesn't fit a 512 MB free tier). So the real cost is the price of the smallest always-on instance with enough RAM, which I did not look up. Also, 133.7 ms was measured on 1 to 2 sentence texts on my laptop; texts near the 400-token limit take longer.
+
 
 ---
 
@@ -1394,3 +1409,20 @@ It helped where the criteria can't see: it stopped three kinds of 6 to 9 charact
   - A real but very short submission of 9 characters or fewer is now rejected. On a writing site that could be a short poem line.
   - There are now two short-text checks. The `ValueError` backstop is no longer exercised by my eval, because the new check catches those inputs first, so the backstop is untested.
   - The 400 message changed. Anything that matched the old "a few sentences at least" wording would break; the eval only checks the status code.
+
+
+---
+
+## What's Still Broken — Capstone
+
+**What remains open:**
+
+- **`/appeal` rejections aren't logged.** `POST /appeal` rejects non-object JSON bodies with a 400, but unlike `/submit` it doesn't write a rejection record to `logs/audit.jsonl`, so a bad appeal leaves no trace.
+- **The 10-character floor (`MIN_TEXT_CHARS`) is blunt.** Genuine artistic micro-text, such as a haiku or a single line of poetry, is blocked, while a 10-character text like "Not today." still gets an evaluation based on thin evidence.
+- **Cold-start latency.** The first GPT-2 load takes 8–12 seconds on server boot (7.9, 12.6 and 10.3 seconds in my three runs), and the first visitor waits for it.
+
+**Why I stopped:** all five declared criteria were met, and changing appeal logging or model loading was outside the single-variable scope of Shape B.
+
+## What I Would Do Next
+
+If I had another unit to harden this system for production, I would deploy it behind a multi-worker WSGI server (Gunicorn) with the GPT-2 model pre-loaded into shared worker memory during container startup. This would eliminate the 8–12 second cold-start latency for the first visitor and decouple CPU-intensive model evaluation from route-level input validation.
