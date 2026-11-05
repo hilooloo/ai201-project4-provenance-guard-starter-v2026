@@ -34,6 +34,25 @@
 
 <!-- ═══════════════════════ UNIT 7 — THE BUILD ═══════════════════════ -->
 
+<!-- ═══════════════════════ THE CAPSTONE ═══════════════════════ -->
+
+## The Capstone Extension
+
+### The System
+I am extending **Provenance Guard** (Project 4).
+
+### The Shape
+- **Chosen Shape:** Shape B — Harden against failure
+- **What I am adding:** I am adding defensive input validation and exception handling to Provenance Guard. Specifically, the system will handle edge cases gracefully—such as text that is too short, body payloads sent as JSON arrays instead of objects, oversized inputs, and missing fields. Instead of crashing with HTTP 500 unhandled exceptions, the server will catch these bad paths and return clean, structured HTTP 400 error responses with logged audit records.
+
+### Out of Scope
+- I am not rebuilding or retraining the GPT-2 language model or changing tokenizer settings.
+- I am not building a frontend web user interface or mobile app.
+- I am not redesigning the underlying stylometric feature calculations.
+
+---
+
+
 ## What This Does
 
 <!-- The path a submission takes, from arriving to the label a reader sees.
