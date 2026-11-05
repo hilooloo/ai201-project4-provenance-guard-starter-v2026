@@ -235,7 +235,20 @@ def submit():
     content_id = f"cnt_{uuid.uuid4().hex[:8]}"
 
     # Milestone 5: two signals, combined, mapped to a reader-facing label.
-    model_score = detector.model_signal(text)
+    try:
+        model_score = detector.model_signal(text)
+    except ValueError as e:
+        # Too few tokens to score (for example a single character). That is
+        # the caller's input, not a server fault, so answer 400 and leave a trace.
+        audit.log_rejection(
+            creator_id=creator_id or "unknown",
+            reason="text_too_short",
+            limit="text must contain at least a few sentences",
+        )
+        return jsonify({
+            "error": "invalid_input",
+            "message": str(e),
+        }), 400
     style_score = stylometry.style_signal(text)
     combined_score = scoring.combine_signals(model_score, style_score)
     confidence = combined_score
