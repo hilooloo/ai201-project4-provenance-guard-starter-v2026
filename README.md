@@ -256,19 +256,201 @@ Each `creator_id` is counted separately. If a request has no usable `creator_id`
 <!-- Every attack with its outcome and a held-or-broke mark.
      `run_attacks.py --label before` produces the table. -->
 
+Source: `results/attack_run_2026-11-04_1956.md` (`run_attacks.py::main`), 56 attacks. The script auto-marked the two HTTP 500 crashes (MF02, RQ07) as BROKE. The other Verdict cells are blank because they depend on my thresholds; the diagnoses below are where I judge them.
 
+| ID | Family | Targeting | Status | Content ID | Guess | Score | Verdict |
+|---|---|---|---|---|---|---|---|
+| EV01 | evasion | signal two: typos raise word variety | 200 | `cnt_cae8030f` | human | 0.326 |  |
+| EV02 | evasion | signal two: broken-up sentences raise length spread | 200 | `cnt_a33cd491` | ai | 0.524 |  |
+| EV03 | evasion | signal two: a pasted quotation changes the shape | 200 | `cnt_c7828894` | ai | 0.602 |  |
+| EV04 | evasion | signal one: unusual words raise perplexity | 200 | `cnt_6715f26d` | ai | 0.613 |  |
+| EV05 | evasion | both signals: heavy human editing pass | 200 | `cnt_05b2e0c1` | human | 0.307 |  |
+| EV06 | evasion | signal two: one very long sentence and one very short | 200 | `cnt_e5f5db03` | human | 0.482 |  |
+| EV07 | evasion | signal two: padding with punctuation | 200 | `cnt_47b7682d` | ai | 0.539 |  |
+| EV08 | evasion | signal one: text below the token window | 200 | `cnt_ac88f17b` | human | 0.391 |  |
+| EV09 | evasion | both: AI text with a human opening paragraph bolted on | 200 | `cnt_36e54cdb` | ai | 0.591 |  |
+| EV10 | evasion | signal two: repeated stanza structure | 200 | `cnt_f53d5f97` | ai | 0.818 |  |
+| FP01 | false_positive | plain, clear human writing with no flourishes | 200 | `cnt_30a35561` | ai | 0.566 |  |
+| FP02 | false_positive | human writing in a formal register | 200 | `cnt_ca2398d5` | ai | 0.716 |  |
+| FP03 | false_positive | a non-native English speaker writing carefully | 200 | `cnt_e5f0fed8` | ai | 0.729 |  |
+| FP04 | false_positive | a student essay written to a rubric | 200 | `cnt_1c01d184` | ai | 0.745 |  |
+| FP05 | false_positive | technical documentation written by a person | 200 | `cnt_0bffbcfa` | ai | 0.780 |  |
+| FP06 | false_positive | a person imitating a formal template | 200 | `cnt_96b82cbd` | ai | 0.740 |  |
+| FP07 | false_positive | human writing that repeats a phrase deliberately | 200 | `cnt_6fccb3f2` | ai | 0.787 |  |
+| FP08 | false_positive | very short genuine human submission | 200 | `cnt_ed98f93d` | human | 0.447 |  |
+| PI01 | prompt_injection | instruction to ignore the check | 200 | `cnt_c8981e1f` | human | 0.454 |  |
+| PI02 | prompt_injection | instruction disguised as a system message | 200 | `cnt_b076ceb4` | human | 0.288 |  |
+| PI03 | prompt_injection | instruction wrapped in the writer's voice | 200 | `cnt_7d95e22a` | ai | 0.546 |  |
+| PI04 | prompt_injection | attempt to make the label text hostile | 200 | `cnt_8c737cb1` | human | 0.456 |  |
+| PI05 | prompt_injection | attempt to inject into the audit log | 200 | `cnt_fd3ccac4` | human | 0.436 |  |
+| PI06 | prompt_injection | instruction plus real human text | 200 | `cnt_035a4e79` | ai | 0.534 |  |
+| MF01 | malformed | text is only whitespace | 400 | `—` | — | — |  |
+| MF02 | malformed | text is a single character | 500 | `—` | — | — | BROKE |
+| MF03 | malformed | text is control characters | 200 | `cnt_9df11dbb` | human | 0.175 |  |
+| MF04 | malformed | text is only punctuation | 200 | `cnt_92c9a110` | human | 0.182 |  |
+| MF05 | malformed | text is a very long single word | 200 | `cnt_aa9aa309` | ai | 0.823 |  |
+| MF06 | malformed | text is emoji only | 200 | `cnt_577cb702` | ai | 0.823 |  |
+| MF07 | malformed | text is right-to-left script | 200 | `cnt_3a62d0ef` | ai | 0.764 |  |
+| MF08 | malformed | text is 60,000 characters | 200 | `cnt_272f072f` | ai | 0.871 |  |
+| RQ01 | malformed | no text field at all | 400 | `—` | — | — |  |
+| RQ02 | malformed | no creator_id | 400 | `—` | — | — |  |
+| RQ03 | malformed | text is a number | 400 | `—` | — | — |  |
+| RQ04 | malformed | text is a list | 400 | `—` | — | — |  |
+| RQ05 | malformed | text is null | 400 | `—` | — | — |  |
+| RQ06 | malformed | creator_id is an object | 200 | `cnt_c3c02b47` | human | 0.207 |  |
+| RQ07 | malformed | body is a JSON array, not an object | 500 | `—` | — | — | BROKE |
+| RQ08 | malformed | body is unparseable JSON | 400 | `—` | — | — |  |
+| RQ09 | malformed | body is empty | 400 | `—` | — | — |  |
+| RQ10 | malformed | body is form-encoded, not JSON | 400 | `—` | — | — |  |
+| RQ11 | malformed | body is JSON claiming to be plain text | 400 | `—` | — | — |  |
+| RQ12 | malformed | deeply nested JSON | 400 | `—` | — | — |  |
+| FL01_01 | flood_same_creator | 20 rapid submissions from one creator | 200 | `cnt_a1839a4c` | human | 0.194 |  |
+| FL01_02 | flood_same_creator | 20 rapid submissions from one creator | 200 | `cnt_f0af625f` | human | 0.194 |  |
+| FL01_03 | flood_same_creator | 20 rapid submissions from one creator | 200 | `cnt_4112286e` | human | 0.194 |  |
+| FL01_04 | flood_same_creator | 20 rapid submissions from one creator | 200 | `cnt_dead43e1` | human | 0.194 |  |
+| FL01_05 | flood_same_creator | 20 rapid submissions from one creator | 200 | `cnt_775de53f` | human | 0.194 |  |
+| FL01_06 | flood_same_creator | 20 rapid submissions from one creator | 200 | `cnt_c492bb64` | human | 0.194 |  |
+| FL01_07 | flood_same_creator | 20 rapid submissions from one creator | 200 | `cnt_6031958e` | human | 0.194 |  |
+| FL01_08 | flood_same_creator | 20 rapid submissions from one creator | 200 | `cnt_8e126f50` | human | 0.194 |  |
+| FL01_09 | flood_same_creator | 20 rapid submissions from one creator | 200 | `cnt_ff8f0e49` | human | 0.194 |  |
+| FL01_10 | flood_same_creator | 20 rapid submissions from one creator | 200 | `cnt_f600a51c` | human | 0.194 |  |
+| FL01_11 | flood_same_creator | 20 rapid submissions from one creator | 429 | `—` | — | — |  |
+| FL01_12 | flood_same_creator | 20 rapid submissions from one creator | 429 | `—` | — | — |  |
 
 **Ten audit log entries from the run**
 
 <!-- Choose entries that show the interesting failures, not the ten easiest. -->
 
-```json
+Covers: false positives (FP01, FP02), evasions that came back "human" (EV01, EV05, EV06, EV08), prompt injection (PI01, PI02), a crash (MF02) and a rate-limit rejection. Entries are from `logs/audit.jsonl`, except MF02: the 500 crashed before anything was logged, so that one is the attack run's own record. RQ07 crashed the same way and also left no log entry. The rate-limit entry is from the flood (`attacker_flood`) and does not carry a content_id.
 
+```json
+[
+{
+  "timestamp": "2026-11-05T00:56:14+00:00",
+  "content_id": "cnt_30a35561",
+  "creator_id": "attacker_FP01",
+  "guess": "ai",
+  "model_score": 0.6175,
+  "style_score": 0.4701,
+  "combined_score": 0.5659,
+  "label": "This piece displays uniform rhythm and predictable patterns commonly produced by automated language models.",
+  "status": "decided",
+  "confidence": 0.5659
+},
+{
+  "timestamp": "2026-11-05T00:56:14+00:00",
+  "content_id": "cnt_ca2398d5",
+  "creator_id": "attacker_FP02",
+  "guess": "ai",
+  "model_score": 0.7387,
+  "style_score": 0.6741,
+  "combined_score": 0.7161,
+  "label": "This piece displays uniform rhythm and predictable patterns commonly produced by automated language models.",
+  "status": "decided",
+  "confidence": 0.7161
+},
+{
+  "timestamp": "2026-11-05T00:56:10+00:00",
+  "content_id": "cnt_cae8030f",
+  "creator_id": "attacker_EV01",
+  "guess": "human",
+  "model_score": 0.1635,
+  "style_score": 0.628,
+  "combined_score": 0.3261,
+  "label": "This piece shows strong personal style and varied sentence rhythm consistent with authentic human writing.",
+  "status": "decided",
+  "confidence": 0.3261
+},
+{
+  "timestamp": "2026-11-05T00:56:12+00:00",
+  "content_id": "cnt_05b2e0c1",
+  "creator_id": "attacker_EV05",
+  "guess": "human",
+  "model_score": 0.3212,
+  "style_score": 0.2806,
+  "combined_score": 0.307,
+  "label": "This piece shows strong personal style and varied sentence rhythm consistent with authentic human writing.",
+  "status": "decided",
+  "confidence": 0.307
+},
+{
+  "timestamp": "2026-11-05T00:56:12+00:00",
+  "content_id": "cnt_e5f5db03",
+  "creator_id": "attacker_EV06",
+  "guess": "human",
+  "model_score": 0.5727,
+  "style_score": 0.3125,
+  "combined_score": 0.4816,
+  "label": "This text presents mixed stylistic and structural signals, so its authorship cannot be determined reliably.",
+  "status": "decided",
+  "confidence": 0.4816
+},
+{
+  "timestamp": "2026-11-05T00:56:13+00:00",
+  "content_id": "cnt_ac88f17b",
+  "creator_id": "attacker_EV08",
+  "guess": "human",
+  "model_score": 0.2452,
+  "style_score": 0.6616,
+  "combined_score": 0.3909,
+  "label": "This piece shows strong personal style and varied sentence rhythm consistent with authentic human writing.",
+  "status": "decided",
+  "confidence": 0.3909
+},
+{
+  "timestamp": "2026-11-05T00:56:16+00:00",
+  "content_id": "cnt_c8981e1f",
+  "creator_id": "attacker_PI01",
+  "guess": "human",
+  "model_score": 0.4625,
+  "style_score": 0.4394,
+  "combined_score": 0.4544,
+  "label": "This text presents mixed stylistic and structural signals, so its authorship cannot be determined reliably.",
+  "status": "decided",
+  "confidence": 0.4544
+},
+{
+  "timestamp": "2026-11-05T00:56:17+00:00",
+  "content_id": "cnt_b076ceb4",
+  "creator_id": "attacker_PI02",
+  "guess": "human",
+  "model_score": 0.2044,
+  "style_score": 0.4445,
+  "combined_score": 0.2884,
+  "label": "This piece shows strong personal style and varied sentence rhythm consistent with authentic human writing.",
+  "status": "decided",
+  "confidence": 0.2884
+},
+{
+  "id": "MF02",
+  "status": 500,
+  "content_id": null,
+  "creator_id": "attacker_MF02",
+  "guess": null,
+  "confidence": null,
+  "model_score": null,
+  "style_score": null,
+  "label": null,
+  "error": "ValueError: Text is too short to score — a few sentences at least. (HTTP 500, Werkzeug debugger page; nothing was written to logs/audit.jsonl)",
+  "verdict": "BROKE"
+},
+{
+  "timestamp": "2026-11-05T00:56:26+00:00",
+  "creator_id": "attacker_flood",
+  "event": "rejected",
+  "status": "rejected",
+  "reason": "rate_limited",
+  "limit": "10 per 1 minute"
+}
+]
 ```
 
 **The single worst outcome** — the one I'd least want to explain to a writer
 whose work got caught by it:
 
+**FP01 and FP02.** Authentic human writing was labelled "high-confidence AI". FP01 (plain, clear human writing) scored 0.5659 and FP02 (human writing in a formal register) scored 0.7161. Both were told: "This piece displays uniform rhythm and predictable patterns commonly produced by automated language models."
+
+That is the worst failure because an innocent author is accused with a confident label, and it is the outcome the service exists to avoid. One false accusation like this can destroy a writer's trust in the whole platform. An evasion bypass (EV01, EV05, EV06, EV08) only means some AI text got through, which a secondary review can still catch.
 
 
 ---
