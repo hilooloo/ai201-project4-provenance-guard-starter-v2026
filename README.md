@@ -459,19 +459,418 @@ That is the worst failure because an innocent author is accused with a confident
 
 <!-- Your five criteria across three trials. `run_eval.py --label before`. -->
 
+Source: `results/run_2026-11-04_2014_before.md`, produced by `run_eval.py::main` against `app.py::submit`, scored by `scoring.py::combine_signals`. Targets are from `criteria.md`.
+
 | Criterion | Target | Run 1 | Run 2 | Run 3 | Verdict |
 |---|---|---|---|---|---|
-| 1.  |  |  |  |  |  |
-| 2.  |  |  |  |  |  |
-| 3.  |  |  |  |  |  |
-| 4.  |  |  |  |  |  |
-| 5.  |  |  |  |  |  |
+| 1. My own writing flagged as AI | at most 1 of 10 | 2/10 | 2/10 | 2/10 | MISSED |
+| 2. Score separation, raw AI vs human | average difference of at least 0.35 | 0.3353 | 0.3353 | 0.3353 | MISSED |
+| 3. Label coverage | each of the 3 labels at least 2 times in 15 | human 4, unsure 0, AI 11 | human 4, unsure 0, AI 11 | human 4, unsure 0, AI 11 | MISSED |
+| 4. Appeal changes status in the audit log | 100% (5 of 5) | 5/5 | 5/5 | 5/5 | MET |
+| 5. Bad input returns 400 without crashing | 5 of 5 | 5/5 | 5/5 | 5/5 | MET |
+
+Criterion 4 was tested manually, not by `run_eval.py`. In each of 3 trials I sent 5 consecutive POST /submit requests, then a valid POST /appeal with 'reasoning' for each, so 15 appeals in total. In every trial 5/5 (100%) transitioned to 'under_review' in `logs/audit.jsonl`, which fulfils the manual evaluation required for the appeal path.
+
+Criterion 2 is the mean `confidence` of the 5 raw AI texts (0.7758) minus the mean of the 5 human texts (0.4405). All three trials gave the same numbers.
 
 **Real output from one trial**, pasted as text, naming the file and function
 that produced it:
 
-```json
+Everything below is Trial 1, copied from `results/run_2026-11-04_2014_before.md`. `run_eval.py::main` sent each text to `POST /submit`, and `app.py::submit` produced these responses. `sent` is the first 70 characters of what was sent.
 
+**Criterion 1 — false positives on human writing**
+
+```json
+[
+  {
+    "status": 200,
+    "guess": "human",
+    "confidence": 0.301,
+    "model_score": 0.3457,
+    "style_score": 0.2179,
+    "label": "This piece shows strong personal style and varied sentence rhythm consistent with authentic human writing.",
+    "sent": "My grandmother kept her recipes on index cards, and half of them were "
+  },
+  {
+    "status": 200,
+    "guess": "ai",
+    "confidence": 0.5965,
+    "model_score": 0.6333,
+    "style_score": 0.5283,
+    "label": "This piece displays uniform rhythm and predictable patterns commonly produced by automated language models.",
+    "sent": "I missed the last bus by about ten seconds. The driver looked right at"
+  },
+  {
+    "status": 200,
+    "guess": "human",
+    "confidence": 0.4033,
+    "model_score": 0.4393,
+    "style_score": 0.3365,
+    "label": "This text presents mixed stylistic and structural signals, so its authorship cannot be determined reliably.",
+    "sent": "The dog hates the vacuum, the doorbell, and Tuesdays. Nobody knows why"
+  },
+  {
+    "status": 200,
+    "guess": "human",
+    "confidence": 0.4911,
+    "model_score": 0.5388,
+    "style_score": 0.4025,
+    "label": "This text presents mixed stylistic and structural signals, so its authorship cannot be determined reliably.",
+    "sent": "Dad taught me to drive in an empty church parking lot, one stalled eng"
+  },
+  {
+    "status": 200,
+    "guess": "human",
+    "confidence": 0.4106,
+    "model_score": 0.4099,
+    "style_score": 0.4119,
+    "label": "This text presents mixed stylistic and structural signals, so its authorship cannot be determined reliably.",
+    "sent": "I can't tell you why I kept the ticket stub. The concert was loud, my "
+  },
+  {
+    "status": 200,
+    "guess": "human",
+    "confidence": 0.3462,
+    "model_score": 0.3871,
+    "style_score": 0.2702,
+    "label": "This piece shows strong personal style and varied sentence rhythm consistent with authentic human writing.",
+    "sent": "It rained the whole week we moved. Boxes went soft, the couch wouldn't"
+  },
+  {
+    "status": 200,
+    "guess": "ai",
+    "confidence": 0.562,
+    "model_score": 0.6201,
+    "style_score": 0.4542,
+    "label": "This piece displays uniform rhythm and predictable patterns commonly produced by automated language models.",
+    "sent": "Writing my first story felt like talking in an empty room. I'd type a "
+  },
+  {
+    "status": 200,
+    "guess": "human",
+    "confidence": 0.2772,
+    "model_score": 0.2261,
+    "style_score": 0.3722,
+    "label": "This piece shows strong personal style and varied sentence rhythm consistent with authentic human writing.",
+    "sent": "The market opens before dawn, and the old man at the corner stall alre"
+  },
+  {
+    "status": 200,
+    "guess": "human",
+    "confidence": 0.3703,
+    "model_score": 0.4519,
+    "style_score": 0.2187,
+    "label": "This piece shows strong personal style and varied sentence rhythm consistent with authentic human writing.",
+    "sent": "My brother and I haven't spoken in a year over something so small I ca"
+  },
+  {
+    "status": 200,
+    "guess": "human",
+    "confidence": 0.3628,
+    "model_score": 0.3562,
+    "style_score": 0.3751,
+    "label": "This piece shows strong personal style and varied sentence rhythm consistent with authentic human writing.",
+    "sent": "I learned to swim at thirty-one, which is embarrassing and also true. "
+  }
+]
+```
+
+**Criterion 2 — score separation: human texts**
+
+```json
+[
+  {
+    "status": 200,
+    "guess": "human",
+    "confidence": 0.301,
+    "model_score": 0.3457,
+    "style_score": 0.2179,
+    "label": "This piece shows strong personal style and varied sentence rhythm consistent with authentic human writing.",
+    "sent": "My grandmother kept her recipes on index cards, and half of them were "
+  },
+  {
+    "status": 200,
+    "guess": "ai",
+    "confidence": 0.5965,
+    "model_score": 0.6333,
+    "style_score": 0.5283,
+    "label": "This piece displays uniform rhythm and predictable patterns commonly produced by automated language models.",
+    "sent": "I missed the last bus by about ten seconds. The driver looked right at"
+  },
+  {
+    "status": 200,
+    "guess": "human",
+    "confidence": 0.4033,
+    "model_score": 0.4393,
+    "style_score": 0.3365,
+    "label": "This text presents mixed stylistic and structural signals, so its authorship cannot be determined reliably.",
+    "sent": "The dog hates the vacuum, the doorbell, and Tuesdays. Nobody knows why"
+  },
+  {
+    "status": 200,
+    "guess": "human",
+    "confidence": 0.4911,
+    "model_score": 0.5388,
+    "style_score": 0.4025,
+    "label": "This text presents mixed stylistic and structural signals, so its authorship cannot be determined reliably.",
+    "sent": "Dad taught me to drive in an empty church parking lot, one stalled eng"
+  },
+  {
+    "status": 200,
+    "guess": "human",
+    "confidence": 0.4106,
+    "model_score": 0.4099,
+    "style_score": 0.4119,
+    "label": "This text presents mixed stylistic and structural signals, so its authorship cannot be determined reliably.",
+    "sent": "I can't tell you why I kept the ticket stub. The concert was loud, my "
+  }
+]
+```
+
+**Criterion 2 — score separation: raw AI texts**
+
+```json
+[
+  {
+    "status": 200,
+    "guess": "ai",
+    "confidence": 0.7723,
+    "model_score": 0.8277,
+    "style_score": 0.6693,
+    "label": "This piece displays uniform rhythm and predictable patterns commonly produced by automated language models.",
+    "sent": "Artificial intelligence has transformed numerous industries in recent "
+  },
+  {
+    "status": 200,
+    "guess": "ai",
+    "confidence": 0.7253,
+    "model_score": 0.759,
+    "style_score": 0.6627,
+    "label": "This piece displays uniform rhythm and predictable patterns commonly produced by automated language models.",
+    "sent": "Effective communication is essential for success in any professional e"
+  },
+  {
+    "status": 200,
+    "guess": "ai",
+    "confidence": 0.8038,
+    "model_score": 0.8804,
+    "style_score": 0.6616,
+    "label": "This piece displays uniform rhythm and predictable patterns commonly produced by automated language models.",
+    "sent": "Climate change represents one of the most significant challenges facin"
+  },
+  {
+    "status": 200,
+    "guess": "ai",
+    "confidence": 0.8236,
+    "model_score": 0.9107,
+    "style_score": 0.6617,
+    "label": "This piece displays uniform rhythm and predictable patterns commonly produced by automated language models.",
+    "sent": "Regular exercise offers numerous benefits for both physical and mental"
+  },
+  {
+    "status": 200,
+    "guess": "ai",
+    "confidence": 0.7538,
+    "model_score": 0.8304,
+    "style_score": 0.6116,
+    "label": "This piece displays uniform rhythm and predictable patterns commonly produced by automated language models.",
+    "sent": "Time management is a critical skill that enables individuals to achiev"
+  }
+]
+```
+
+**Criterion 3 — label coverage**
+
+```json
+[
+  {
+    "status": 200,
+    "guess": "human",
+    "confidence": 0.3462,
+    "model_score": 0.3871,
+    "style_score": 0.2702,
+    "label": "This piece shows strong personal style and varied sentence rhythm consistent with authentic human writing.",
+    "sent": "It rained the whole week we moved. Boxes went soft, the couch wouldn't"
+  },
+  {
+    "status": 200,
+    "guess": "ai",
+    "confidence": 0.562,
+    "model_score": 0.6201,
+    "style_score": 0.4542,
+    "label": "This piece displays uniform rhythm and predictable patterns commonly produced by automated language models.",
+    "sent": "Writing my first story felt like talking in an empty room. I'd type a "
+  },
+  {
+    "status": 200,
+    "guess": "human",
+    "confidence": 0.2772,
+    "model_score": 0.2261,
+    "style_score": 0.3722,
+    "label": "This piece shows strong personal style and varied sentence rhythm consistent with authentic human writing.",
+    "sent": "The market opens before dawn, and the old man at the corner stall alre"
+  },
+  {
+    "status": 200,
+    "guess": "human",
+    "confidence": 0.3703,
+    "model_score": 0.4519,
+    "style_score": 0.2187,
+    "label": "This piece shows strong personal style and varied sentence rhythm consistent with authentic human writing.",
+    "sent": "My brother and I haven't spoken in a year over something so small I ca"
+  },
+  {
+    "status": 200,
+    "guess": "human",
+    "confidence": 0.3628,
+    "model_score": 0.3562,
+    "style_score": 0.3751,
+    "label": "This piece shows strong personal style and varied sentence rhythm consistent with authentic human writing.",
+    "sent": "I learned to swim at thirty-one, which is embarrassing and also true. "
+  },
+  {
+    "status": 200,
+    "guess": "ai",
+    "confidence": 0.5721,
+    "model_score": 0.6838,
+    "style_score": 0.3646,
+    "label": "This piece displays uniform rhythm and predictable patterns commonly produced by automated language models.",
+    "sent": "The meeting ran long, mostly because nobody wanted to be the one to sa"
+  },
+  {
+    "status": 200,
+    "guess": "ai",
+    "confidence": 0.6373,
+    "model_score": 0.7426,
+    "style_score": 0.4416,
+    "label": "This piece displays uniform rhythm and predictable patterns commonly produced by automated language models.",
+    "sent": "Moving to a new city comes with a lot of adjustments. You learn the ne"
+  },
+  {
+    "status": 200,
+    "guess": "ai",
+    "confidence": 0.705,
+    "model_score": 0.7554,
+    "style_score": 0.6114,
+    "label": "This piece displays uniform rhythm and predictable patterns commonly produced by automated language models.",
+    "sent": "Our team shipped the update on Friday after a few late nights. The new"
+  },
+  {
+    "status": 200,
+    "guess": "ai",
+    "confidence": 0.6281,
+    "model_score": 0.7689,
+    "style_score": 0.3665,
+    "label": "This piece displays uniform rhythm and predictable patterns commonly produced by automated language models.",
+    "sent": "I think learning a second language is mostly about showing up every da"
+  },
+  {
+    "status": 200,
+    "guess": "ai",
+    "confidence": 0.7405,
+    "model_score": 0.8629,
+    "style_score": 0.5132,
+    "label": "This piece displays uniform rhythm and predictable patterns commonly produced by automated language models.",
+    "sent": "The restaurant was fine. The service was friendly, the portions were g"
+  },
+  {
+    "status": 200,
+    "guess": "ai",
+    "confidence": 0.7723,
+    "model_score": 0.8277,
+    "style_score": 0.6693,
+    "label": "This piece displays uniform rhythm and predictable patterns commonly produced by automated language models.",
+    "sent": "Artificial intelligence has transformed numerous industries in recent "
+  },
+  {
+    "status": 200,
+    "guess": "ai",
+    "confidence": 0.7253,
+    "model_score": 0.759,
+    "style_score": 0.6627,
+    "label": "This piece displays uniform rhythm and predictable patterns commonly produced by automated language models.",
+    "sent": "Effective communication is essential for success in any professional e"
+  },
+  {
+    "status": 200,
+    "guess": "ai",
+    "confidence": 0.8038,
+    "model_score": 0.8804,
+    "style_score": 0.6616,
+    "label": "This piece displays uniform rhythm and predictable patterns commonly produced by automated language models.",
+    "sent": "Climate change represents one of the most significant challenges facin"
+  },
+  {
+    "status": 200,
+    "guess": "ai",
+    "confidence": 0.8236,
+    "model_score": 0.9107,
+    "style_score": 0.6617,
+    "label": "This piece displays uniform rhythm and predictable patterns commonly produced by automated language models.",
+    "sent": "Regular exercise offers numerous benefits for both physical and mental"
+  },
+  {
+    "status": 200,
+    "guess": "ai",
+    "confidence": 0.7538,
+    "model_score": 0.8304,
+    "style_score": 0.6116,
+    "label": "This piece displays uniform rhythm and predictable patterns commonly produced by automated language models.",
+    "sent": "Time management is a critical skill that enables individuals to achiev"
+  }
+]
+```
+
+**Criterion 5 — bad input**
+
+```json
+[
+  {
+    "status": 400,
+    "guess": null,
+    "confidence": null,
+    "model_score": null,
+    "style_score": null,
+    "label": null,
+    "sent": "(empty text)"
+  },
+  {
+    "status": 400,
+    "guess": null,
+    "confidence": null,
+    "model_score": null,
+    "style_score": null,
+    "label": null,
+    "sent": "{\"creator_id\": \"eval_bad_missing\"}"
+  },
+  {
+    "status": 400,
+    "guess": null,
+    "confidence": null,
+    "model_score": null,
+    "style_score": null,
+    "label": null,
+    "sent": "   \n\t  "
+  },
+  {
+    "status": 400,
+    "guess": null,
+    "confidence": null,
+    "model_score": null,
+    "style_score": null,
+    "label": null,
+    "sent": "{\"text\": null, \"creator_id\": \"eval_bad_null\"}"
+  },
+  {
+    "status": 400,
+    "guess": null,
+    "confidence": null,
+    "model_score": null,
+    "style_score": null,
+    "label": null,
+    "sent": "{\"text\": \"This text has no creator.\"}"
+  }
+]
 ```
 
 **Diagnoses**
